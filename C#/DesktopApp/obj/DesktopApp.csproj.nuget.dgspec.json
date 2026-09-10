@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj": {}
+    "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj": {
+    "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj",
+        "projectUniqueName": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj",
         "projectName": "DesktopApp",
-        "projectPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj",
+        "projectPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\DesktopApp\\DesktopApp.csproj",
         "packagesPath": "C:\\Users\\Hp\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\Projetos\\C#\\DesktopApp\\obj\\",
+        "outputPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\DesktopApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
