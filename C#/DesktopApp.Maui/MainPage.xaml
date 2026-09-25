@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DesktopApp.Maui.MainPage"
+             BackgroundColor="#111820"
+             Shell.NavBarIsVisible="False">
+    <Grid x:Name="LayoutRoot" RowDefinitions="*,Auto" ColumnDefinitions="*,0">
+        <Border x:Name="NavigationPanel"
+                Grid.Row="1"
+                Grid.Column="0"
+                BackgroundColor="#172129"
+                Stroke="#2D3A42"
+                StrokeThickness="0,1,0,0"
+                Padding="10,8">
+            <VerticalStackLayout x:Name="NavigationContent" Spacing="16">
+                <VerticalStackLayout x:Name="BrandBlock" Spacing="3" IsVisible="False">
+                    <Label Text="DesktopApp" FontSize="21" FontAttributes="Bold" TextColor="#F3F5F4" />
+                    <Label Text="GESTÃO DA EQUIPA" FontSize="10" CharacterSpacing="1.4" TextColor="#91A0A5" />
+                </VerticalStackLayout>
+                <ScrollView x:Name="NavigationScroll" Orientation="Horizontal" HeightRequest="54">
+                    <StackLayout x:Name="NavigationItems" Orientation="Horizontal" Spacing="6" />
+                </ScrollView>
+            </VerticalStackLayout>
+        </Border>
+        <ScrollView x:Name="ContentScroll" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <VerticalStackLayout x:Name="PageContent" Padding="24,28" Spacing="18" />
+        </ScrollView>
+    </Grid>
+</ContentPage>

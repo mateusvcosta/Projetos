@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="DesktopApp.Maui" mvid="f5e4cf57e9514d9881e269dcaf587f2d">
+  <java-to-managed>
+    <entry java-name="crc64306082d1a2e81f92/MainActivity" managed-name="DesktopApp.Maui.MainActivity, DesktopApp.Maui" managed-type-token-id="33554441" />
+    <entry java-name="crc64306082d1a2e81f92/MainApplication" managed-name="DesktopApp.Maui.MainApplication, DesktopApp.Maui" managed-type-token-id="33554442" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc64306082d1a2e81f92/MainActivity" managed-name="DesktopApp.Maui.MainActivity, DesktopApp.Maui" managed-type-token-id="33554441" />
+    <entry java-name="crc64306082d1a2e81f92/MainApplication" managed-name="DesktopApp.Maui.MainApplication, DesktopApp.Maui" managed-type-token-id="33554442" />
+  </managed-to-java>
+</api>
