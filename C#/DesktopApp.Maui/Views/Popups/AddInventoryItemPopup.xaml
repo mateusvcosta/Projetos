@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="DesktopApp.Maui.Views.Popups.AddInventoryItemPopup"
+    BackgroundColor="Transparent"
+    Padding="0">
+    <Border
+        WidthRequest="320"
+        MaximumWidthRequest="460"
+        Padding="22"
+        BackgroundColor="#172129"
+        Stroke="#2D3A42"
+        StrokeThickness="1"
+        StrokeShape="RoundRectangle 8">
+        <VerticalStackLayout Spacing="16">
+            <VerticalStackLayout Spacing="5">
+                <Label
+                    Text="Novo item"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    TextColor="#F3F5F4" />
+                <Label
+                    Text="Adicione um item ao inventário."
+                    FontSize="14"
+                    TextColor="#AAB7BA" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10">
+                <Entry
+                    x:Name="NameEntry"
+                    Placeholder="Nome do item"
+                    MaxLength="80"
+                    TextColor="#F3F5F4"
+                    PlaceholderColor="#91A0A5"
+                    BackgroundColor="#1A262E" />
+                <Entry
+                    x:Name="QuantityEntry"
+                    Placeholder="Quantidade"
+                    Text="1"
+                    Keyboard="Numeric"
+                    MaxLength="5"
+                    TextColor="#F3F5F4"
+                    PlaceholderColor="#91A0A5"
+                    BackgroundColor="#1A262E" />
+                <Label
+                    x:Name="ErrorLabel"
+                    IsVisible="False"
+                    FontSize="13"
+                    TextColor="#E88E9A" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button
+                    Grid.Column="0"
+                    Text="Cancelar"
+                    Clicked="OnCancelClicked"
+                    TextColor="#F3F5F4"
+                    BackgroundColor="#2D3A42"
+                    CornerRadius="6" />
+                <Button
+                    Grid.Column="1"
+                    Text="Guardar"
+                    Clicked="OnSaveClicked"
+                    TextColor="White"
+                    BackgroundColor="#D94F65"
+                    CornerRadius="6" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

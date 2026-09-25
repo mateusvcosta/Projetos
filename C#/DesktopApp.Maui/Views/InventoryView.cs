@@ -1,3 +1,8 @@
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Extensions;
+using CommunityToolkit.Maui.Views;
+using DesktopApp.Maui.Views.Popups;
+
 namespace DesktopApp.Maui.Views;
 
 public sealed class InventoryView : ContentView
@@ -34,7 +39,67 @@ public sealed class InventoryView : ContentView
             Padding = new Thickness(14, 10)
         };
 
+        var addButtonTable = new Button
+        {
+            Text = "Nova Tabela",
+            TextColor = Colors.White,
+            BackgroundColor = Color.FromArgb("#D94F65"),
+            FontSize = 13,
+            FontAttributes = FontAttributes.Bold,
+            CornerRadius = 6,
+            Padding = new Thickness(14, 10)
+        };
+
         var titleRow = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star)
+            },
+            VerticalOptions = LayoutOptions.Center
+        };
+        titleRow.Add(titleLabel, 0, 0);
+
+        addButton.Clicked += async (_, _) =>
+        {
+            var shell = Shell.Current;
+            if (shell is null)
+            {
+                return;
+            }
+
+            var popup = new AddInventoryItemPopup();
+            await shell.ShowPopupAsync(popup, new PopupOptions
+            {
+                CanBeDismissedByTappingOutsideOfPopup = false,
+                PageOverlayColor = Color.FromArgb("#B0000000"),
+                Shape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                {
+                    CornerRadius = 8,
+                    Fill = Color.FromArgb("#172129"),
+                    Stroke = Color.FromArgb("#172129"),
+                    StrokeThickness = 0
+                },
+                Shadow = null
+            });
+            if (popup.Item is { } item)
+            {
+                items.Add(new InventoryItem(item.Name, item.Quantity));
+                RefreshItemRows();
+            }
+        };
+
+        content.Children.Add(titleRow);
+        content.Children.Add(addButtonTable);
+        content.Children.Add(CreateTable(addButton));
+        Content = content;
+        RefreshItemRows();
+    }
+
+    private Border CreateTable(Button addItemButton)
+    {
+        var table = new VerticalStackLayout { Spacing = 0 };
+        var tableTitle = new Grid
         {
             ColumnDefinitions =
             {
@@ -42,126 +107,12 @@ public sealed class InventoryView : ContentView
                 new ColumnDefinition(GridLength.Auto)
             },
             ColumnSpacing = 12,
-            VerticalOptions = LayoutOptions.Center
-        };
-        titleRow.Add(titleLabel, 0, 0);
-        titleRow.Add(addButton, 1, 0);
-        content.Children.Add(titleRow);
-        content.Children.Add(new Label
-        {
-            Text = "Itens guardados pela equipa.",
-            FontSize = 15,
-            TextColor = Color.FromArgb("#AAB7BA")
-        });
-
-        var nameEntry = CreateEntry("Nome do item");
-        var quantityEntry = CreateEntry("Quantidade");
-        quantityEntry.Keyboard = Keyboard.Numeric;
-        quantityEntry.Text = "1";
-        var formMessage = new Label
-        {
-            TextColor = Color.FromArgb("#E88E9A"),
-            FontSize = 13,
-            IsVisible = false
-        };
-
-        var saveButton = new Button
-        {
-            Text = "Guardar",
-            TextColor = Colors.White,
-            BackgroundColor = Color.FromArgb("#D94F65"),
-            CornerRadius = 6
-        };
-        var cancelButton = new Button
-        {
-            Text = "Cancelar",
-            TextColor = Color.FromArgb("#F3F5F4"),
-            BackgroundColor = Color.FromArgb("#2D3A42"),
-            CornerRadius = 6
-        };
-        var formActions = new HorizontalStackLayout
-        {
-            Spacing = 10,
-            HorizontalOptions = LayoutOptions.End,
-            Children = { cancelButton, saveButton }
-        };
-        var formContent = new VerticalStackLayout
-        {
-            Spacing = 10,
-            Children = { nameEntry, quantityEntry, formMessage, formActions }
-        };
-        var addForm = new Border
-        {
-            IsVisible = false,
-            BackgroundColor = Color.FromArgb("#172129"),
-            Stroke = Color.FromArgb("#2D3A42"),
-            StrokeThickness = 1,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 8 },
-            Padding = 16,
-            Content = formContent
-        };
-
-        addButton.Clicked += (_, _) =>
-        {
-            addForm.IsVisible = true;
-            nameEntry.Focus();
-        };
-        cancelButton.Clicked += (_, _) =>
-        {
-            addForm.IsVisible = false;
-            formMessage.IsVisible = false;
-            nameEntry.Text = string.Empty;
-            quantityEntry.Text = "1";
-        };
-        saveButton.Clicked += (_, _) =>
-        {
-            var name = nameEntry.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(name)
-                || !int.TryParse(quantityEntry.Text, out var quantity)
-                || quantity < 1)
-            {
-                formMessage.Text = "Introduza o nome e uma quantidade válida.";
-                formMessage.IsVisible = true;
-                return;
-            }
-
-            items.Add(new InventoryItem(name, quantity));
-            RefreshItemRows();
-            addForm.IsVisible = false;
-            formMessage.IsVisible = false;
-            nameEntry.Text = string.Empty;
-            quantityEntry.Text = "1";
-        };
-
-        content.Children.Add(addForm);
-        content.Children.Add(new Label
-        {
-            Text = "ITENS",
-            FontSize = 11,
-            FontAttributes = FontAttributes.Bold,
-            CharacterSpacing = 1.5,
-            TextColor = Color.FromArgb("#91A0A5"),
-            Margin = new Thickness(0, 12, 0, 0)
-        });
-        content.Children.Add(CreateTable());
-        Content = content;
-        RefreshItemRows();
-    }
-
-    private static Entry CreateEntry(string placeholder)
-    {
-        return new Entry
-        {
-            Placeholder = placeholder,
-            TextColor = Color.FromArgb("#F3F5F4"),
-            PlaceholderColor = Color.FromArgb("#91A0A5"),
+            Padding = new Thickness(12, 8),
             BackgroundColor = Color.FromArgb("#1A262E")
         };
-    }
-
-    private Border CreateTable()
-    {
-        var table = new VerticalStackLayout { Spacing = 0 };
+        tableTitle.Add(CreateTableLabel("ITENS", true), 0, 0);
+        tableTitle.Add(addItemButton, 1, 0);
+        table.Children.Add(tableTitle);
         var header = new Grid
         {
             ColumnDefinitions =
