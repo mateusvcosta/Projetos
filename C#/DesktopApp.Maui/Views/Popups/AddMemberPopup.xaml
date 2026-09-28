@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    x:Class="DesktopApp.Maui.Views.Popups.AddInventoryItemPopup"
+    x:Class="DesktopApp.Maui.Views.Popups.AddMemberPopup"
     BackgroundColor="Transparent"
     Padding="0">
     <Border
@@ -17,14 +17,12 @@
         <VerticalStackLayout Spacing="16">
             <VerticalStackLayout Spacing="5">
                 <Label
-                    x:Name="TitleLabel"
-                    Text="Novo item"
+                    Text="Novo membro"
                     FontSize="22"
                     FontAttributes="Bold"
                     TextColor="#F3F5F4" />
                 <Label
-                    x:Name="DescriptionLabel"
-                    Text="Adicione um item ao inventário."
+                    Text="Adicione um membro à tabela Tunos."
                     FontSize="14"
                     TextColor="#AAB7BA" />
             </VerticalStackLayout>
@@ -32,25 +30,16 @@
             <VerticalStackLayout Spacing="10">
                 <Entry
                     x:Name="NameEntry"
-                    Placeholder="Nome do item"
+                    Placeholder="Nome do membro"
                     MaxLength="80"
                     TextColor="#F3F5F4"
                     PlaceholderColor="#91A0A5"
                     BackgroundColor="#1A262E" />
                 <Entry
-                    x:Name="QuantityEntry"
-                    Placeholder="Quantidade"
-                    Text="1"
-                    Keyboard="Numeric"
-                    MaxLength="5"
-                    TextColor="#F3F5F4"
-                    PlaceholderColor="#91A0A5"
-                    BackgroundColor="#1A262E" />
-                <Entry
-                    x:Name="UnitCostEntry"
-                    Placeholder="Custo unitário (€)"
-                    Keyboard="Default"
-                    MaxLength="12"
+                    x:Name="RoleEntry"
+                    Text="Tuno"
+                    Placeholder="Cargo"
+                    MaxLength="60"
                     TextColor="#F3F5F4"
                     PlaceholderColor="#91A0A5"
                     BackgroundColor="#1A262E" />
@@ -70,9 +59,8 @@
                     BackgroundColor="#2D3A42"
                     CornerRadius="6" />
                 <Button
-                    x:Name="SaveButton"
                     Grid.Column="1"
-                    Text="Guardar"
+                    Text="Adicionar"
                     Clicked="OnSaveClicked"
                     TextColor="White"
                     BackgroundColor="#D94F65"

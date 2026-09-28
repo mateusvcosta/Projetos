@@ -8,7 +8,7 @@ public partial class MainPage : ContentPage
     [
         "Início",
         "Inventário",
-        "Calendário",
+        "Eventos",
         "Membros",
         "Definições"
     ];
@@ -114,7 +114,7 @@ public partial class MainPage : ContentPage
         ContentView sectionView = section switch
         {
             "Inventário" => new InventoryView(isWideLayout),
-            "Calendário" => new CalendarView(isWideLayout),
+            "Eventos" => new EventsView(isWideLayout),
             "Membros" => new MembersView(isWideLayout),
             "Definições" => new SettingsView(isWideLayout),
             _ => new HomeView(isWideLayout)
