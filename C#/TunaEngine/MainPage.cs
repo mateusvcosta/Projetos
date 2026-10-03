@@ -215,27 +215,41 @@ public sealed class MainPage : ContentPage
         {
             ColumnDefinitions =
             {
-                new ColumnDefinition(new GridLength(28)),
+                new ColumnDefinition(new GridLength(38)),
                 new ColumnDefinition(GridLength.Star)
             },
-            ColumnSpacing = 10
+            ColumnSpacing = 10,
+            Padding = new Thickness(0)
         };
-        accountLayout.Add(new Ellipse
+        var avatar = new Border
         {
-            WidthRequest = 28,
-            HeightRequest = 28,
-            Fill = ViewTheme.Accent,
-            VerticalOptions = LayoutOptions.Center
-        }, 0, 0);
+            WidthRequest = 38,
+            HeightRequest = 38,
+            BackgroundColor = Color.FromArgb("#FF5C8A"),
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 19 },
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.Center,
+            Content = new Label
+            {
+                Text = "U",
+                FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Colors.White,
+                HorizontalTextAlignment = TextAlignment.Center,
+                VerticalTextAlignment = TextAlignment.Center
+            }
+        };
+        accountLayout.Add(avatar, 0, 0);
         accountLayout.Add(CreateAccountLabels(), 1, 0);
         var account = new Border
         {
             Margin = new Thickness(0, 0, 0, 12),
-            BackgroundColor = ViewTheme.Surface,
+            BackgroundColor = ViewTheme.SurfaceDark,
             Stroke = ViewTheme.Stroke,
             StrokeThickness = 1,
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            Padding = new Thickness(12, 0),
+            StrokeShape = new RoundRectangle { CornerRadius = 10 },
+            Padding = new Thickness(12, 8),
             Content = accountLayout
         };
         var navigationContent = new Grid
@@ -365,19 +379,28 @@ public sealed class MainPage : ContentPage
 
     private static VerticalStackLayout CreateAccountLabels()
     {
-        var labels = new VerticalStackLayout { Spacing = 2, VerticalOptions = LayoutOptions.Center };
+        var labels = new VerticalStackLayout
+        {
+            Spacing = 0,
+            VerticalOptions = LayoutOptions.Center,
+            Padding = new Thickness(0, 1, 0, 1)
+        };
         labels.Children.Add(new Label
         {
             Text = "Utilizador",
             FontSize = 12,
             FontAttributes = FontAttributes.Bold,
-            TextColor = ViewTheme.Text
+            TextColor = ViewTheme.Text,
+            VerticalTextAlignment = TextAlignment.Center,
+            Margin = new Thickness(0)
         });
         labels.Children.Add(new Label
         {
             Text = "Membro",
             FontSize = 11,
-            TextColor = ViewTheme.Muted
+            TextColor = ViewTheme.Muted,
+            VerticalTextAlignment = TextAlignment.Center,
+            Margin = new Thickness(0)
         });
         return labels;
     }
