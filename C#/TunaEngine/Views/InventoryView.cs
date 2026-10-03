@@ -1,316 +1,422 @@
-using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Extensions;
-using CommunityToolkit.Maui.Views;
-using TunaEngine.Views.Popups;
 using System.Globalization;
 
 namespace TunaEngine.Views;
 
 public sealed class InventoryView : ContentView
 {
-    private readonly List<InventoryItem> items =
-    [
-        new("Cabo XLR", 4),
-        new("Microfone", 2),
-        new("Suporte", 3)
-    ];
-
-    private readonly VerticalStackLayout itemRows = new() { Spacing = 0 };
-    private readonly Label totalCostLabel = new()
+    public InventoryView()
     {
-        FontSize = 22,
-        FontAttributes = FontAttributes.Bold,
-        TextColor = Color.FromArgb("#F3F5F4"),
-        HorizontalTextAlignment = TextAlignment.End,
-        VerticalTextAlignment = TextAlignment.Center
-    };
+        Render();
+    }
 
-    public InventoryView(bool isWideLayout)
+    private void Render()
     {
-        var content = new VerticalStackLayout { Spacing = 18 };
-        var titleLabel = new Label
-        {
-            Text = "Inventário",
-            FontSize = isWideLayout ? 34 : 29,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Color.FromArgb("#F3F5F4")
-        };
-        SemanticProperties.SetHeadingLevel(titleLabel, SemanticHeadingLevel.Level1);
+        var content = new VerticalStackLayout { Spacing = 0 };
+        var title = ViewTheme.TextLabel("Inventário", 30, true);
+        SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
+        title.HeightRequest = 36;
+        title.Margin = new Thickness(0, 0, 0, 12);
+        content.Children.Add(title);
 
-        var addButton = new Button
+        var items = AppSession.Tables.SelectMany(table => table.Items).ToList();
+        var total = items.Any(item => !item.UnitCost.HasValue)
+            ? "Custos em falta"
+            : AppSession.Money(items.Sum(item => item.Quantity * item.UnitCost.GetValueOrDefault()));
+        var summaryContent = new VerticalStackLayout
         {
-            Text = "Novo item",
-            TextColor = Colors.White,
-            BackgroundColor = Color.FromArgb("#D94F65"),
-            FontSize = 13,
-            FontAttributes = FontAttributes.Bold,
-            CornerRadius = 6,
-            Padding = new Thickness(14, 10)
-        };
-
-        var addButtonTable = new Button
-        {
-            Text = "Nova Tabela",
-            TextColor = Colors.White,
-            BackgroundColor = Color.FromArgb("#D94F65"),
-            FontSize = 13,
-            FontAttributes = FontAttributes.Bold,
-            CornerRadius = 6,
-            Padding = new Thickness(14, 10)
-        };
-
-        var titleRow = new Grid
-        {
-            ColumnDefinitions =
+            Spacing = 6,
+            Padding = new Thickness(20, 16),
+            Children =
             {
-                new ColumnDefinition(GridLength.Star)
-            },
-            VerticalOptions = LayoutOptions.Center
-        };
-        titleRow.Add(titleLabel, 0, 0);
-
-        var totalCostSummary = new Grid
-        {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 12,
-            Padding = new Thickness(14, 12),
-            BackgroundColor = Color.FromArgb("#1A262E")
-        };
-        totalCostSummary.Add(new Label
-        {
-            Text = "CUSTO TOTAL DO INVENTÁRIO",
-            FontSize = 12,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Color.FromArgb("#91A0A5"),
-            VerticalTextAlignment = TextAlignment.Center
-        }, 0, 0);
-        totalCostSummary.Add(totalCostLabel, 1, 0);
-        var totalCostBorder = new Border
-        {
-            BackgroundColor = Color.FromArgb("#1A262E"),
-            Stroke = Color.FromArgb("#2D3A42"),
-            StrokeThickness = 1,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 8 },
-            Content = totalCostSummary
-        };
-
-        addButton.Clicked += async (_, _) =>
-        {
-            var popup = new AddInventoryItemPopup();
-            if (await ShowItemPopupAsync(popup) is { } item)
-            {
-                items.Add(new InventoryItem(item.Name, item.Quantity, item.UnitCost));
-                RefreshItemRows();
+                ViewTheme.TextLabel("CUSTO TOTAL DO INVENTÁRIO", 11, true, ViewTheme.Muted),
+                ViewTheme.TextLabel(total, 22, true)
             }
         };
+        var summary = ViewTheme.Card(summaryContent, 0);
+        summary.WidthRequest = 520;
+        summary.HeightRequest = 72;
+        summary.HorizontalOptions = LayoutOptions.Start;
 
-        content.Children.Add(titleRow);
-        content.Children.Add(totalCostBorder);
-        content.Children.Add(CreateTable(addButton));
-        content.Children.Add(addButtonTable);
-        Content = content;
-        RefreshItemRows();
-    }
+        var newItemButton = ViewTheme.Action("+ Novo item", async () =>
+        {
+            if (AppSession.Tables.Count > 0)
+                await EditItem(AppSession.Tables[0], null);
+        });
+        newItemButton.WidthRequest = 220;
+        newItemButton.HeightRequest = 48;
+        newItemButton.MinimumHeightRequest = 48;
+        newItemButton.FontSize = 15;
+        newItemButton.Padding = 0;
 
-    private Border CreateTable(Button addItemButton)
-    {
-        var table = new VerticalStackLayout { Spacing = 0 };
-        var tableTitle = new Grid
+        var summaryRow = new Grid
         {
             ColumnDefinitions =
             {
                 new ColumnDefinition(GridLength.Star),
                 new ColumnDefinition(GridLength.Auto)
             },
-            ColumnSpacing = 12,
-            Padding = new Thickness(12, 8),
-            BackgroundColor = Color.FromArgb("#1A262E")
+            ColumnSpacing = 0,
+            HeightRequest = 72,
+            HorizontalOptions = LayoutOptions.Fill,
+            Margin = new Thickness(0, 0, 0, 24)
         };
-        tableTitle.Add(CreateTableLabel("ITENS", true), 0, 0);
-        tableTitle.Add(addItemButton, 1, 0);
-        table.Children.Add(tableTitle);
-        var header = new Grid
-        {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(new GridLength(68)),
-                new ColumnDefinition(new GridLength(112)),
-                new ColumnDefinition(new GridLength(126))
-            },
-            ColumnSpacing = 6,
-            Padding = new Thickness(8, 12),
-            BackgroundColor = Color.FromArgb("#202D35")
-        };
-        header.Add(CreateTableLabel("ITEM", true), 0, 0);
-        header.Add(CreateTableLabel("QTD.", true, TextAlignment.End), 1, 0);
-        header.Add(CreateTableLabel("CUSTO/UN.", true, TextAlignment.End), 2, 0);
-        header.Add(CreateTableLabel("", true), 3, 0);
-        table.Children.Add(header);
-        table.Children.Add(new BoxView
-        {
-            HeightRequest = 1,
-            BackgroundColor = Color.FromArgb("#2D3A42")
-        });
-        table.Children.Add(itemRows);
+        summaryRow.Add(summary, 0, 0);
+        summaryRow.Add(newItemButton, 1, 0);
+        content.Children.Add(summaryRow);
 
-        return new Border
+        var tables = new VerticalStackLayout
         {
-            BackgroundColor = Color.FromArgb("#1A262E"),
-            Stroke = Color.FromArgb("#2D3A42"),
-            StrokeThickness = 1,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 8 },
-            Content = table
+            Spacing = 16,
+            HorizontalOptions = LayoutOptions.Fill
         };
+        foreach (var table in AppSession.Tables)
+            tables.Children.Add(BuildInventoryTable(table));
+        content.Children.Add(tables);
+
+        var newTableButton = ViewTheme.Action("+ Nova Tabela", AddTable);
+        newTableButton.WidthRequest = 260;
+        newTableButton.HeightRequest = 48;
+        newTableButton.MinimumHeightRequest = 48;
+        newTableButton.FontSize = 15;
+        newTableButton.Padding = 0;
+        newTableButton.Margin = new Thickness(0, 24, 0, 0);
+        newTableButton.HorizontalOptions = LayoutOptions.Start;
+        content.Children.Add(newTableButton);
+        Content = content;
     }
 
-    private void RefreshItemRows()
+    private View BuildInventoryTable(StockTable table)
     {
-        itemRows.Children.Clear();
-        if (items.Count == 0)
+        var columns = new[]
         {
-            itemRows.Children.Add(new Label
+            new GridLength(480, GridUnitType.Star),
+            new GridLength(100, GridUnitType.Star),
+            new GridLength(140, GridUnitType.Star),
+            new GridLength(140, GridUnitType.Star),
+            new GridLength(120, GridUnitType.Star),
+            new GridLength(120, GridUnitType.Star)
+        };
+
+        Grid CreateRow(params View[] cells)
+        {
+            var grid = new Grid
             {
-                Text = "Nenhum item no inventário.",
-                FontSize = 14,
-                TextColor = Color.FromArgb("#91A0A5"),
-                Margin = new Thickness(14, 16)
-            });
-            RefreshTotalCost();
-            return;
+                ColumnSpacing = 0,
+                Padding = new Thickness(20, 0),
+                HeightRequest = 64
+            };
+
+            foreach (var width in columns)
+                grid.ColumnDefinitions.Add(new ColumnDefinition(width));
+
+            for (var index = 0; index < cells.Length; index++)
+                grid.Add(cells[index], index, 0);
+
+            return grid;
         }
 
-        for (var index = 0; index < items.Count; index++)
+        var panel = new VerticalStackLayout { Spacing = 0 };
+        var sectionHeader = new Grid
         {
-            var item = items[index];
-            var row = new Grid
+            Padding = new Thickness(20, 0),
+            HeightRequest = 40,
+            BackgroundColor = ViewTheme.SurfaceDark
+        };
+        var panelTitle = ViewTheme.TextLabel(
+            table.Name.ToUpper(AppSession.Portuguese), 11, true, ViewTheme.Muted);
+        sectionHeader.Add(panelTitle, 0, 0);
+        sectionHeader.Add(new BoxView
+        {
+            HeightRequest = 1,
+            Color = ViewTheme.Stroke,
+            VerticalOptions = LayoutOptions.End
+        }, 0, 0);
+        panel.Children.Add(sectionHeader);
+
+        var headings = CreateRow(
+            ViewTheme.TextLabel("Item", 12, true, ViewTheme.Muted),
+            AlignedLabel("Qtd.", TextAlignment.End),
+            AlignedLabel("Custo/Un.", TextAlignment.End),
+            AlignedLabel("Total", TextAlignment.End),
+            CenteredLabel("Editar", ViewTheme.Muted, 12, true),
+            CenteredLabel("Remover", ViewTheme.Muted, 12, true));
+        headings.HeightRequest = 44;
+        headings.BackgroundColor = ViewTheme.SurfaceDark;
+        var headingsDivider = new BoxView
+        {
+            HeightRequest = 1,
+            Color = ViewTheme.Stroke,
+            VerticalOptions = LayoutOptions.End
+        };
+        Grid.SetColumnSpan(headingsDivider, headings.ColumnDefinitions.Count);
+        headings.Add(headingsDivider, 0, 0);
+        panel.Children.Add(headings);
+
+        for (var index = 0; index < table.Items.Count; index++)
+        {
+            var item = table.Items[index];
+            var capturedItem = item;
+            var icon = ItemIcon(item.Name);
+
+            var itemCell = new Grid
             {
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition(GridLength.Star),
-                    new ColumnDefinition(new GridLength(68)),
-                    new ColumnDefinition(new GridLength(112)),
-                    new ColumnDefinition(new GridLength(126))
+                    new ColumnDefinition(new GridLength(32)),
+                    new ColumnDefinition(GridLength.Star)
                 },
-                ColumnSpacing = 6,
-                Padding = new Thickness(8, 8)
+                ColumnSpacing = 12
             };
-            row.Add(CreateTableLabel(item.Name), 0, 0);
-            row.Add(CreateTableLabel(item.Quantity.ToString(), false, TextAlignment.End), 1, 0);
-            var unitCostLabel = CreateTableLabel(
-                item.UnitCost?.ToString("C", CultureInfo.GetCultureInfo("pt-PT")) ?? "—",
-                false,
-                TextAlignment.End);
-            row.Add(unitCostLabel, 2, 0);
-            var actions = new HorizontalStackLayout { Spacing = 0 };
-            var editButton = new Button
+            var itemIcon = new Border
             {
-                Text = "Editar",
-                FontSize = 11,
-                Padding = new Thickness(4, 8),
-                MinimumWidthRequest = 54,
-                MinimumHeightRequest = 44,
-                CornerRadius = 4,
-                TextColor = Color.FromArgb("#F3F5F4"),
-                BackgroundColor = Colors.Transparent,
-                AutomationId = $"EditInventoryItem{index}"
-            };
-            editButton.Clicked += async (_, _) =>
-            {
-                var popup = new AddInventoryItemPopup(item.Name, item.Quantity, item.UnitCost);
-                if (await ShowItemPopupAsync(popup) is { } updatedItem)
+                WidthRequest = 32,
+                HeightRequest = 32,
+                BackgroundColor = Color.FromArgb("#333355"),
+                StrokeThickness = 0,
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 6 },
+                Content = new Image
                 {
-                    items[index] = new InventoryItem(updatedItem.Name, updatedItem.Quantity, updatedItem.UnitCost);
-                    RefreshItemRows();
+                    Source = icon,
+                    WidthRequest = 16,
+                    HeightRequest = 16,
+                    Aspect = Aspect.AspectFit
                 }
             };
-            actions.Children.Add(editButton);
+            itemCell.Add(itemIcon, 0, 0);
+            itemCell.Add(ViewTheme.TextLabel(item.Name, 14), 1, 0);
 
-            var removeButton = new Button
-            {
-                Text = "Remover",
-                FontSize = 11,
-                Padding = new Thickness(4, 8),
-                MinimumWidthRequest = 44,
-                MinimumHeightRequest = 44,
-                CornerRadius = 4,
-                TextColor = Color.FromArgb("#E88E9A"),
-                BackgroundColor = Colors.Transparent,
-                AutomationId = $"RemoveInventoryItem{index}"
-            };
-            removeButton.Clicked += (_, _) =>
-            {
-                items.Remove(item);
-                RefreshItemRows();
-            };
-            actions.Children.Add(removeButton);
-            row.Add(actions, 3, 0);
-            itemRows.Children.Add(row);
-            itemRows.Children.Add(new BoxView
+            var editButton = TableAction("pencil.svg", "Editar", ViewTheme.Muted,
+                () => EditItem(table, capturedItem));
+            var removeButton = TableAction("trash.svg", "Remover", ViewTheme.Accent,
+                () => RemoveItem(table, capturedItem));
+            var row = CreateRow(
+                itemCell,
+                AlignedLabel(item.Quantity.ToString(), TextAlignment.End, Color.FromArgb("#CCCCDD"), 14),
+                AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.End, ViewTheme.Muted, 14),
+                AlignedLabel(AppSession.Money(
+                    item.UnitCost.HasValue ? item.UnitCost.Value * item.Quantity : null),
+                    TextAlignment.End, ViewTheme.Muted, 14),
+                editButton,
+                removeButton);
+            row.HeightRequest = 64;
+            var rowDivider = new BoxView
             {
                 HeightRequest = 1,
-                BackgroundColor = Color.FromArgb("#2D3A42")
-            });
+                Color = ViewTheme.Stroke,
+                VerticalOptions = LayoutOptions.End
+            };
+            Grid.SetColumnSpan(rowDivider, row.ColumnDefinitions.Count);
+            row.Add(rowDivider, 0, 0);
+            panel.Children.Add(row);
         }
 
-        RefreshTotalCost();
+        return new Border
+        {
+            BackgroundColor = ViewTheme.Surface,
+            Stroke = ViewTheme.Stroke,
+            StrokeThickness = 1,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
+            Padding = 0,
+            HorizontalOptions = LayoutOptions.Fill,
+            Content = panel
+        };
     }
 
-    private static async Task<InventoryItemDraft?> ShowItemPopupAsync(AddInventoryItemPopup popup)
+    private static Label CenteredLabel(
+        string text,
+        Color? color = null,
+        double size = 10,
+        bool bold = false)
+    {
+        var label = ViewTheme.TextLabel(text, size, bold, color ?? ViewTheme.Muted);
+        label.HorizontalTextAlignment = TextAlignment.Center;
+        return label;
+    }
+
+    private static Label AlignedLabel(
+        string text,
+        TextAlignment alignment,
+        Color? color = null,
+        double size = 12,
+        bool bold = true)
+    {
+        var label = ViewTheme.TextLabel(text, size, bold, color ?? ViewTheme.Muted);
+        label.HorizontalTextAlignment = alignment;
+        return label;
+    }
+
+    private static string ItemIcon(string itemName)
+    {
+        if (itemName.Contains("mic", StringComparison.OrdinalIgnoreCase))
+            return "microphone.svg";
+        if (itemName.Contains("suporte", StringComparison.OrdinalIgnoreCase) ||
+            itemName.Contains("stand", StringComparison.OrdinalIgnoreCase))
+            return "stand.svg";
+        return "music.svg";
+    }
+
+    private static View TableAction(string icon, string text, Color color, Func<Task> callback)
+    {
+        var visual = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(new GridLength(16)),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 6,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+        visual.Add(new Image
+        {
+            Source = icon,
+            WidthRequest = 16,
+            HeightRequest = 16,
+            Aspect = Aspect.AspectFit
+        }, 0, 0);
+        visual.Add(ViewTheme.TextLabel(text, 13, true, color), 1, 0);
+
+        var button = new Button
+        {
+            Text = "",
+            BackgroundColor = Colors.Transparent,
+            Padding = 0,
+            CornerRadius = 0,
+            MinimumHeightRequest = 64,
+            MinimumWidthRequest = 0,
+            Opacity = 0
+        };
+        SemanticProperties.SetDescription(button, text);
+        button.Clicked += async (_, _) => await callback();
+
+        var action = new Grid { HeightRequest = 64 };
+        action.Add(visual);
+        action.Add(button);
+        return action;
+    }
+
+    private async Task AddTable()
     {
         var shell = Shell.Current;
         if (shell is null)
         {
-            return null;
-        }
-
-        await shell.ShowPopupAsync(popup, new PopupOptions
-        {
-            CanBeDismissedByTappingOutsideOfPopup = false,
-            PageOverlayColor = Color.FromArgb("#B0000000"),
-            Shape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
-            {
-                CornerRadius = 8,
-                Fill = Color.FromArgb("#172129"),
-                Stroke = Color.FromArgb("#172129"),
-                StrokeThickness = 0
-            },
-            Shadow = null
-        });
-
-        return popup.Item;
-    }
-
-    private void RefreshTotalCost()
-    {
-        if (items.Any(item => item.UnitCost is null))
-        {
-            totalCostLabel.Text = "Custos em falta";
-            totalCostLabel.FontSize = 14;
             return;
         }
 
-        var total = items.Sum(item => item.Quantity * item.UnitCost!.Value);
-        totalCostLabel.Text = total.ToString("C", CultureInfo.GetCultureInfo("pt-PT"));
-        totalCostLabel.FontSize = 22;
-    }
-
-    private static Label CreateTableLabel(string text, bool isHeader = false, TextAlignment alignment = TextAlignment.Start)
-    {
-        return new Label
+        var name = await shell.DisplayPromptAsync("Nova tabela", "Nome da tabela:", "Criar", "Cancelar");
+        if (string.IsNullOrWhiteSpace(name))
         {
-            Text = text,
-            FontSize = isHeader ? 11 : 14,
-            FontAttributes = isHeader ? FontAttributes.Bold : FontAttributes.None,
-            TextColor = isHeader ? Color.FromArgb("#91A0A5") : Color.FromArgb("#F3F5F4"),
-            HorizontalTextAlignment = alignment,
-            VerticalTextAlignment = TextAlignment.Center
-        };
+            return;
+        }
+
+        AppSession.Tables.Add(new StockTable { Name = name.Trim() });
+        Render();
     }
 
-    private sealed record InventoryItem(string Name, int Quantity, decimal? UnitCost = null);
+    private async Task EditItem(StockTable table, StockItem? item)
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var name = await shell.DisplayPromptAsync(
+            item is null ? "Novo item" : "Editar item",
+            "Nome:",
+            "Continuar",
+            "Cancelar",
+            initialValue: item?.Name ?? "");
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        var quantityText = await shell.DisplayPromptAsync(
+            "Quantidade",
+            "Introduza uma quantidade inteira:",
+            "Continuar",
+            "Cancelar",
+            keyboard: Keyboard.Numeric,
+            initialValue: item?.Quantity.ToString() ?? "1");
+        if (quantityText is null)
+        {
+            return;
+        }
+
+        if (!int.TryParse(quantityText, out var quantity) || quantity < 0)
+        {
+            await shell.DisplayAlertAsync(
+                "Quantidade inválida",
+                "Utilize um número inteiro igual ou superior a zero.",
+                "OK");
+            return;
+        }
+
+        var costText = await shell.DisplayPromptAsync(
+            "Custo por unidade",
+            "Deixe vazio se o custo for desconhecido.",
+            "Guardar",
+            "Cancelar",
+            keyboard: Keyboard.Numeric,
+            initialValue: item?.UnitCost?.ToString(AppSession.Portuguese) ?? "");
+        if (costText is null)
+        {
+            return;
+        }
+
+        decimal? cost = null;
+        if (!string.IsNullOrWhiteSpace(costText))
+        {
+            if (!decimal.TryParse(
+                    costText,
+                    NumberStyles.Number,
+                    AppSession.Portuguese,
+                    out var parsedCost) ||
+                parsedCost < 0)
+            {
+                await shell.DisplayAlertAsync(
+                    "Custo inválido",
+                    "Utilize um valor positivo, por exemplo 12,50.",
+                    "OK");
+                return;
+            }
+
+            cost = parsedCost;
+        }
+
+        item ??= new StockItem();
+        item.Name = name.Trim();
+        item.Quantity = quantity;
+        item.UnitCost = cost;
+        if (!table.Items.Contains(item))
+        {
+            table.Items.Add(item);
+        }
+
+        Render();
+    }
+
+    private async Task RemoveItem(StockTable table, StockItem item)
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var confirmed = await shell.DisplayAlertAsync(
+            "Remover item",
+            $"Remover “{item.Name}”?",
+            "Remover",
+            "Cancelar");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        table.Items.Remove(item);
+        Render();
+    }
 }

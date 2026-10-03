@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="TunaEngine" mvid="69a6a38c4e784abdbde3fd21c7aed362">
+  <java-to-managed>
+    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554451" />
+    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554452" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554451" />
+    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554452" />
+  </managed-to-java>
+</api>

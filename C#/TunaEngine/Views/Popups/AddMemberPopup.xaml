@@ -10,21 +10,21 @@
         WidthRequest="320"
         MaximumWidthRequest="460"
         Padding="22"
-        BackgroundColor="#172129"
-        Stroke="#2D3A42"
+        BackgroundColor="{StaticResource ThemeSurface}"
+        Stroke="{StaticResource ThemeStroke}"
         StrokeThickness="1"
-        StrokeShape="RoundRectangle 8">
+        StrokeShape="RoundRectangle 12">
         <VerticalStackLayout Spacing="16">
             <VerticalStackLayout Spacing="5">
                 <Label
                     Text="Novo membro"
                     FontSize="22"
                     FontAttributes="Bold"
-                    TextColor="#F3F5F4" />
+                    TextColor="{StaticResource ThemeText}" />
                 <Label
                     Text="Adicione um membro à tabela Tunos."
                     FontSize="14"
-                    TextColor="#AAB7BA" />
+                    TextColor="{StaticResource ThemeMuted}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="10">
@@ -32,22 +32,22 @@
                     x:Name="NameEntry"
                     Placeholder="Nome do membro"
                     MaxLength="80"
-                    TextColor="#F3F5F4"
-                    PlaceholderColor="#91A0A5"
-                    BackgroundColor="#1A262E" />
+                    TextColor="{StaticResource ThemeText}"
+                    PlaceholderColor="{StaticResource ThemeMuted}"
+                    BackgroundColor="{StaticResource ThemeSurfaceDark}" />
                 <Entry
                     x:Name="RoleEntry"
                     Text="Tuno"
                     Placeholder="Cargo"
                     MaxLength="60"
-                    TextColor="#F3F5F4"
-                    PlaceholderColor="#91A0A5"
-                    BackgroundColor="#1A262E" />
+                    TextColor="{StaticResource ThemeText}"
+                    PlaceholderColor="{StaticResource ThemeMuted}"
+                    BackgroundColor="{StaticResource ThemeSurfaceDark}" />
                 <Label
                     x:Name="ErrorLabel"
                     IsVisible="False"
                     FontSize="13"
-                    TextColor="#E88E9A" />
+                    TextColor="{StaticResource ThemeError}" />
             </VerticalStackLayout>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
@@ -55,16 +55,16 @@
                     Grid.Column="0"
                     Text="Cancelar"
                     Clicked="OnCancelClicked"
-                    TextColor="#F3F5F4"
-                    BackgroundColor="#2D3A42"
-                    CornerRadius="6" />
+                    TextColor="{StaticResource ThemeText}"
+                    BackgroundColor="{StaticResource ThemeSurfaceDark}"
+                    CornerRadius="10" />
                 <Button
                     Grid.Column="1"
                     Text="Adicionar"
                     Clicked="OnSaveClicked"
                     TextColor="White"
-                    BackgroundColor="#D94F65"
-                    CornerRadius="6" />
+                    BackgroundColor="{StaticResource ThemeAccent}"
+                    CornerRadius="10" />
             </Grid>
         </VerticalStackLayout>
     </Border>
