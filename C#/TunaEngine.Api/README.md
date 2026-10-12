@@ -13,9 +13,18 @@ dotnet run --project .\TunaEngine.Api.csproj
 
 For MongoDB Atlas, set `MongoDb__ConnectionString` to the connection string supplied by Atlas. `MongoDb:DatabaseName` and `MongoDb:InventoryCollectionName` default to `TunaEngine` and `inventory`; override them with `MongoDb__DatabaseName` and `MongoDb__InventoryCollectionName`.
 
-The singleton `MongoClient` is reused for the lifetime of the API. Pool and timeout options intentionally use the MongoDB driver's defaults until deployment topology and workload concurrency are known.
+The singleton `MongoClient` is reused for the lifetime of the API. Pool and timeout options intentionally use the MongoDB driver's defaults until deployment topology and workload concurrency are known. Example requests are in `TunaEngine.Api.http`.
 
-Check `GET /health` to verify the API can ping MongoDB. Example requests are in `TunaEngine.Api.http`.
+## API structure
+
+This project uses controller-based ASP.NET Core routes, not Minimal APIs:
+
+- `Controllers/InventoryController.cs` defines the inventory HTTP routes with attributes such as `[HttpGet]` and `[HttpPost]`.
+- `Interfaces/InventoryInterface.cs` declares the inventory operations used by the controller.
+- `Services/InventoryService.cs` contains inventory database operations; its interface is registered in `Program.cs`.
+- `Models/` contains the MongoDB document and request model.
+
+There is no special `Routes` folder requirement. In this controller-based style, route definitions live on controller classes and actions; `Program.cs` enables them with `AddControllers()` and `MapControllers()`.
 
 ## Inventory endpoints
 
