@@ -1,0 +1,12 @@
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\appsettings.Development.json
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\appsettings.json
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\TunaEngine.Api.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\TunaEngine.Api.deps.json
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\TunaEngine.Api.runtimeconfig.json
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\TunaEngine.Api.pdb
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\DnsClient.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\MongoDB.Bson.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\MongoDB.Driver.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\SharpCompress.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\Snappier.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine.Api\bin\render-root-check\ZstdSharp.dll
