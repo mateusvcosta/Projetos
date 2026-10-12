@@ -1,0 +1,18 @@
+[
+{
+    "Id_Doc_Type": "TIP-0001",
+    "Doc_type": "Fatura"
+},
+{
+    "Id_Doc_Type": "TIP-0002",
+    "Doc_type": "Recibo"
+},
+{
+    "Id_Doc_Type": "TIP-0003",
+    "Doc_type": "Orçamentos"
+},
+{
+    "Id_Doc_Type": "TIP-0004",
+    "Doc_type": "Ata"
+}
+]

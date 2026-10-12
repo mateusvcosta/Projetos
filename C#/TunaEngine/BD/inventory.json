@@ -1,0 +1,10 @@
+{
+  "Id_inventory": "INV-0001",
+  "Date_added": {"$date": "2026-10-10T16:45:33Z"},
+  "Designation": "Guitarra-1",
+  "Instrument_Type": "Cordas",
+  "Price": 250,
+  "Condition": "Bom Estado",
+  "Function": "Usado em Atuações",
+  "Obs": ""
+}

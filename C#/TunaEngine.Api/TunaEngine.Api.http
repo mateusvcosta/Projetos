@@ -1,0 +1,23 @@
+@TunaEngine.Api_HostAddress = http://localhost:5020
+
+GET {{TunaEngine.Api_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/inventory
+Accept: application/json
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/inventory
+Content-Type: application/json
+
+{
+  "designation": "Guitarra-1",
+  "instrumentType": "Cordas",
+  "price": 250,
+  "condition": "Bom Estado",
+  "function": "Usado em Atuações",
+  "notes": ""
+}

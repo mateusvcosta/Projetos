@@ -1,0 +1,9 @@
+{
+    "Id_Documento": "DOC-0001",
+    "Tipo_Documento": "Fatura",
+    "Id_Doc_Type": "TIP-0001",
+    "File_Path": "",
+    "Date_Created": {"$date": "2026-10-10T16:45:33Z"},
+    "Added_By": "MEM-0001",
+    "Obs": ""
+}

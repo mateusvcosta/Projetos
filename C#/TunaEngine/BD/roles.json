@@ -1,0 +1,26 @@
+[
+{
+    "Id_Cargo": "CAR-0001",
+    "Cargo_Type": "Magister"
+},
+{
+    "Id_Cargo": "CAR-0002",
+    "Cargo_Type": "Presidente"
+},
+{
+    "Id_Cargo": "CAR-0003",
+    "Cargo_Type": "Ensaiador"
+},
+{
+    "Id_Cargo": "CAR-0004",
+    "Cargo_Type": "Tuno"
+},
+{
+    "Id_Cargo": "CAR-0005",
+    "Cargo_Type": "Caloiro"
+},
+{
+    "Id_Cargo": "CAR-0006",
+    "Cargo_Type": "Pré-Caloiro"
+}
+]

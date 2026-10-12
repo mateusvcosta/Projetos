@@ -257,7 +257,7 @@ public sealed class MainPage : ContentPage
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
-                new RowDefinition(new GridLength(44))
+                new RowDefinition(GridLength.Auto)
             }
         };
         navigationContent.Add(navigationScroll, 0, 0);

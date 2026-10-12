@@ -1,0 +1,36 @@
+[
+  {
+    "Id_Event": "EVT-0001",
+    "Date_Hour": "2026-10-18T18:00:00+01:00",
+    "Name": "Atuação de exemplo",
+    "Location": "Auditório Municipal",
+    "Participants": [
+      {
+        "Id_Member": "MEM-0001",
+        "Attendance_Status": "Vai"
+      },
+      {
+        "Id_Member": "MEM-0002",
+        "Attendance_Status": "Não vai"
+      }
+    ],
+    "Instruments_Needed": [
+      {
+        "Id_Inventory": "INV-0001",
+        "Designation": "Guitarra-1",
+        "Quantity": 1
+      }
+    ],
+    "Boleias": [
+      {
+        "Id_Driver": "MEM-0001",
+        "Pickup_Location": "Sala da Tuna",
+        "Departure_Hour": "17:15",
+        "Available_Seats": 1,
+        "Passenger_Ids": [
+          "MEM-0002"
+        ]
+      }
+    ]
+  }
+]

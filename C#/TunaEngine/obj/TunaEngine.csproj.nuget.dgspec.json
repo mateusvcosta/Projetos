@@ -89,6 +89,10 @@
               "target": "Package",
               "version": "[10.0.11, )",
               "autoReferenced": true
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[3.12.0, )"
             }
           },
           "imports": [
@@ -410,6 +414,10 @@
               "target": "Package",
               "version": "[10.0.11, )",
               "autoReferenced": true
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[3.12.0, )"
             }
           },
           "imports": [
@@ -731,6 +739,10 @@
               "target": "Package",
               "version": "[10.0.11, )",
               "autoReferenced": true
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[3.12.0, )"
             }
           },
           "imports": [
@@ -1047,6 +1059,10 @@
             "Microsoft.Maui.Controls": {
               "target": "Package",
               "version": "[10.0.20, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[3.12.0, )"
             }
           },
           "imports": [
