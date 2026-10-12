@@ -215,11 +215,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\TunaEngine.Api\\TunaEngine.Api.csproj",
+      "projectUniqueName": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine.Api\\TunaEngine.Api.csproj",
       "projectName": "TunaEngine.Api",
-      "projectPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\TunaEngine.Api\\TunaEngine.Api.csproj",
+      "projectPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine.Api\\TunaEngine.Api.csproj",
       "packagesPath": "C:\\Users\\Hp\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\TunaEngine.Api\\obj\\",
+      "outputPath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

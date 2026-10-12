@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FRHAGLxQUwo=",
+  "dgSpecHash": "4u2K1G6WkK4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\C#\\TunaEngine.Api\\TunaEngine.Api.csproj",
+  "projectFilePath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine.Api\\TunaEngine.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Hp\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
     "C:\\Users\\Hp\\.nuget\\packages\\mongodb.bson\\3.12.0\\mongodb.bson.3.12.0.nupkg.sha512",
