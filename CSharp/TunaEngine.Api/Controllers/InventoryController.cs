@@ -7,8 +7,7 @@ namespace TunaEngine.Api.Controllers;
 
 [ApiController]
 [Route("api/inventory")]
-public sealed class InventoryController(
-    InventoryInterface inventoryService) : ControllerBase
+public sealed class InventoryController(InventoryInterface inventoryService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<InventoryItem>>> GetAll(

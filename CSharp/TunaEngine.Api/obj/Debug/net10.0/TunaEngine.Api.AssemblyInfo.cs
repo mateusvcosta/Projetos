@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("24c31a8d-31b5-472f-ad9e-a8d16a7860ab")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("TunaEngine.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d5dd24660d9e8923bc2f1f676b06cf6a38aac95")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36b38c525a76aca5a7d87ed218a472e46ae5e954")]
 [assembly: System.Reflection.AssemblyProductAttribute("TunaEngine.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TunaEngine.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

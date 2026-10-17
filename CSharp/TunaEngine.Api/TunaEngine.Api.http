@@ -1,4 +1,7 @@
 @TunaEngine.Api_HostAddress = http://localhost:5020
+@documentTypeObjectId = 507f1f77bcf86cd799439011
+@documentObjectId = 507f1f77bcf86cd799439012
+@eventObjectId = 507f1f77bcf86cd799439013
 
 GET {{TunaEngine.Api_HostAddress}}/api/inventory
 Accept: application/json
@@ -16,3 +19,144 @@ Content-Type: application/json
   "function": "Usado em Atuações",
   "notes": ""
 }
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/doc-types
+Accept: application/json
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/doc-types/{{documentTypeObjectId}}
+Accept: application/json
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/doc-types
+Content-Type: application/json
+
+{
+  "id_Doc_Type": "TIP-0005",
+  "doc_type": "Contrato"
+}
+
+###
+
+PUT {{TunaEngine.Api_HostAddress}}/api/doc-types/{{documentTypeObjectId}}
+Content-Type: application/json
+
+{
+  "id_Doc_Type": "TIP-0005",
+  "doc_type": "Contrato"
+}
+
+###
+
+DELETE {{TunaEngine.Api_HostAddress}}/api/doc-types/{{documentTypeObjectId}}
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/documents
+Accept: application/json
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/documents/{{documentObjectId}}
+Accept: application/json
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/documents
+Content-Type: application/json
+
+{
+  "id_Documento": "DOC-0002",
+  "tipo_Documento": "Recibo",
+  "id_Doc_Type": "TIP-0002",
+  "file_Path": "",
+  "date_Created": "2026-10-13T16:00:00Z",
+  "added_By": "MEM-0001",
+  "obs": ""
+}
+
+###
+
+PUT {{TunaEngine.Api_HostAddress}}/api/documents/{{documentObjectId}}
+Content-Type: application/json
+
+{
+  "id_Documento": "DOC-0002",
+  "tipo_Documento": "Recibo",
+  "id_Doc_Type": "TIP-0002",
+  "file_Path": "",
+  "date_Created": "2026-10-13T16:00:00Z",
+  "added_By": "MEM-0001",
+  "obs": ""
+}
+
+###
+
+DELETE {{TunaEngine.Api_HostAddress}}/api/documents/{{documentObjectId}}
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/events
+Accept: application/json
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/events/{{eventObjectId}}
+Accept: application/json
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/events
+Content-Type: application/json
+
+{
+  "id_Event": "EVT-0002",
+  "date_Hour": "2026-10-18T18:00:00+01:00",
+  "name": "Atuação de exemplo",
+  "location": "Auditório Municipal",
+  "participants": [
+    {
+      "id_Member": "MEM-0001",
+      "attendance_Status": "Vai"
+    }
+  ],
+  "instruments_Needed": [
+    {
+      "id_Inventory": "INV-0001",
+      "designation": "Guitarra-1",
+      "quantity": 1
+    }
+  ],
+  "boleias": [
+    {
+      "id_Driver": "MEM-0001",
+      "pickup_Location": "Sala da Tuna",
+      "departure_Hour": "17:15",
+      "available_Seats": 1,
+      "passenger_Ids": ["MEM-0002"]
+    }
+  ]
+}
+
+###
+
+PUT {{TunaEngine.Api_HostAddress}}/api/events/{{eventObjectId}}
+Content-Type: application/json
+
+{
+  "id_Event": "EVT-0002",
+  "date_Hour": "2026-10-18T18:00:00+01:00",
+  "name": "Atuação de exemplo",
+  "location": "Auditório Municipal",
+  "participants": [],
+  "instruments_Needed": [],
+  "boleias": []
+}
+
+###
+
+DELETE {{TunaEngine.Api_HostAddress}}/api/events/{{eventObjectId}}
