@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using MongoDB.Driver;
 using TunaEngine.Api.Interfaces;
 using TunaEngine.Api.Models;
@@ -51,6 +52,7 @@ builder.Services.AddSingleton(provider =>
 builder.Services.AddSingleton(provider =>
     provider.GetRequiredService<IMongoDatabase>()
         .GetCollection<Members>(mongoSettings.MembersCollectionName));
+builder.Services.AddScoped<IPasswordHasher<Members>, PasswordHasher<Members>>();
 builder.Services.AddScoped<InventoryInterface, InventoryService>();
 builder.Services.AddScoped<RolesInterface, RolesService>();
 builder.Services.AddScoped<DocumentTypesInterface, DocumentTypesService>();

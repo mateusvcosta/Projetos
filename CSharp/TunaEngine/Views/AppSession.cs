@@ -4,8 +4,9 @@ namespace TunaEngine.Views;
 
 internal sealed class StockItem
 {
+    public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public int Quantity { get; set; }
+    public int? Quantity { get; set; }
     public decimal? UnitCost { get; set; }
 }
 
@@ -17,14 +18,16 @@ internal sealed class StockTable
 
 internal sealed class TeamMember
 {
+    public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string Role { get; set; } = "Tuno";
 }
 
 internal sealed class AgendaEvent
 {
+    public string Id { get; set; } = "";
     public string Title { get; set; } = "";
-    public string Description { get; set; } = "Conteúdo de demonstração";
+    public string Description { get; set; } = "";
     public DateTime? Date { get; set; }
 }
 
@@ -41,39 +44,14 @@ internal static class AppSession
         ["domingo", "segunda-feira", "terça-feira", "quarta-feira",
          "quinta-feira", "sexta-feira", "sábado"];
 
-    public static DateTime SelectedDate { get; set; } = new(2026, 10, 2);
+    public static DateTime SelectedDate { get; set; } = DateTime.Today;
 
-    public static List<StockTable> Tables { get; } =
-    [
-        new StockTable
-        {
-            Name = "Itens",
-            Items =
-            {
-                new StockItem { Name = "Cabo XLR", Quantity = 4 },
-                new StockItem { Name = "Microfone", Quantity = 2 },
-                new StockItem { Name = "Suporte", Quantity = 3 }
-            }
-        }
-    ];
-
-    public static List<TeamMember> Members { get; } =
-    [
-        new TeamMember { Name = "João Silva", Role = "Tuno" },
-        new TeamMember { Name = "Maria Oliveira", Role = "Tuno" },
-        new TeamMember { Name = "Carlos Santos", Role = "Tuno" }
-    ];
-
-    public static List<AgendaEvent> Events { get; } =
-    [
-        new AgendaEvent { Title = "Reunião" },
-        new AgendaEvent { Title = "Entrega" },
-        new AgendaEvent { Title = "Evento" }
-    ];
-
-    public static string ProfileName { get; set; } = "Conteúdo de demonstração";
-    public static string ProfileEmail { get; set; } = "Conteúdo de demonstração";
-    public static string ProfileRole { get; set; } = "Conteúdo de demonstração";
+    public static List<StockTable> Tables { get; } = [];
+    public static List<TeamMember> Members { get; } = [];
+    public static List<AgendaEvent> Events { get; } = [];
+    public static string ProfileName { get; set; } = "";
+    public static string ProfileEmail { get; set; } = "";
+    public static string ProfileRole { get; set; } = "";
 
     public static string Money(decimal? value) =>
         value.HasValue ? value.Value.ToString("C", Portuguese) : "—";

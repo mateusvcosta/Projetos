@@ -1,9 +1,14 @@
-﻿namespace TunaEngine;
+﻿using TunaEngine.Services;
+
+namespace TunaEngine;
 
 public sealed class App : Application
 {
-    public App()
+    private readonly TunaEngineApiClient _apiClient;
+
+    public App(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
         var resources = new ResourceDictionary();
         resources.Add("ThemeBackground", Color.FromArgb("#202033"));
         resources.Add("ThemeSidebar", Color.FromArgb("#1A1A2E"));
@@ -19,7 +24,7 @@ public sealed class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = new Window(new AppShell())
+        var window = new Window(new AppShell(_apiClient))
         {
             Title = "TunaEngine",
             Width = 1280,

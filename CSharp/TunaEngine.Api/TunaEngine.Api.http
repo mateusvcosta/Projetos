@@ -2,6 +2,45 @@
 @documentTypeObjectId = 507f1f77bcf86cd799439011
 @documentObjectId = 507f1f77bcf86cd799439012
 @eventObjectId = 507f1f77bcf86cd799439013
+@memberObjectId = 507f1f77bcf86cd799439014
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/members
+Content-Type: application/json
+
+{
+  "name": "Example Member",
+  "email": "member@example.com",
+  "password": "ChangeThisPassword123"
+}
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/members/login
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "ChangeThisPassword123"
+}
+
+###
+
+POST {{TunaEngine.Api_HostAddress}}/api/members/login
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "wrong-password"
+}
+
+###
+
+GET {{TunaEngine.Api_HostAddress}}/api/members/{{memberObjectId}}
+Accept: application/json
+
+###
 
 GET {{TunaEngine.Api_HostAddress}}/api/inventory
 Accept: application/json

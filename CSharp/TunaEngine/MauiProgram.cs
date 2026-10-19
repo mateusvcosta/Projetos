@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using TunaEngine.Services;
 
 namespace TunaEngine;
 
@@ -29,6 +30,13 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
+
+		builder.Services.AddSingleton(_ => new HttpClient
+		{
+			BaseAddress = new Uri("https://tunaengine.onrender.com/"),
+			Timeout = TimeSpan.FromSeconds(30)
+		});
+		builder.Services.AddSingleton<TunaEngineApiClient>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

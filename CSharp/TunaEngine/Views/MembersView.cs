@@ -1,7 +1,15 @@
+using System.Net.Http;
+using System.Text.Json;
+using TunaEngine.Services;
+
 namespace TunaEngine.Views;
 
 public sealed class MembersView : ContentView
 {
+    private readonly TunaEngineApiClient _apiClient;
+    private readonly Label _status = ViewTheme.TextLabel("A carregar membros...", 13, color: ViewTheme.Muted);
+    private readonly Button _retryButton;
+
     private static readonly Color[] AvatarColors =
     [
         Color.FromArgb("#E8526A"),
@@ -9,13 +17,18 @@ public sealed class MembersView : ContentView
         Color.FromArgb("#9B6B9B")
     ];
 
-    public MembersView()
+    public MembersView(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
+        _retryButton = ViewTheme.Action("Tentar novamente", LoadMembersAsync, primary: false);
+        _retryButton.IsVisible = false;
         Render();
+        _ = LoadMembersAsync();
     }
 
     private void Render()
     {
+        Content = null;
         var content = new VerticalStackLayout
         {
             Spacing = 0,
@@ -60,6 +73,8 @@ public sealed class MembersView : ContentView
         header.Add(addButton, 1, 0);
         Grid.SetRowSpan(addButton, 3);
         content.Children.Add(header);
+        content.Children.Add(_status);
+        content.Children.Add(_retryButton);
 
         var table = new VerticalStackLayout
         {
@@ -83,6 +98,46 @@ public sealed class MembersView : ContentView
         });
 
         Content = content;
+    }
+
+    private async Task LoadMembersAsync()
+    {
+        _status.Text = "A carregar membros...";
+        _status.TextColor = ViewTheme.Muted;
+        _retryButton.IsVisible = false;
+
+        try
+        {
+            var memberTask = _apiClient.GetAsync<List<ApiMember>>("api/members");
+            var roleTask = _apiClient.GetAsync<List<ApiRole>>("api/roles");
+            await Task.WhenAll(memberTask, roleTask);
+            var roles = await roleTask;
+            var members = await memberTask;
+
+            AppSession.Members.Clear();
+            AppSession.Members.AddRange(members.Select(member =>
+            {
+                var role = roles.FirstOrDefault(candidate =>
+                    string.Equals(candidate.Id, member.RoleId, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(candidate.RoleCode, member.RoleId, StringComparison.OrdinalIgnoreCase));
+                return new TeamMember
+                {
+                    Id = member.Id,
+                    Name = member.Name,
+                    Role = role?.Name ?? member.RoleId ?? "Membro"
+                };
+            }));
+
+            _status.Text = members.Count == 0 ? "Não existem membros na base de dados." : "";
+            Render();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível carregar os membros: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
+            _retryButton.IsVisible = true;
+        }
     }
 
     private static Grid BuildTableHeader()

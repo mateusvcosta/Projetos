@@ -1,5 +1,6 @@
 ﻿using TunaEngine.Views;
 using Microsoft.Maui.Controls.Shapes;
+using TunaEngine.Services;
 
 namespace TunaEngine;
 
@@ -13,12 +14,14 @@ public sealed class MainPage : ContentPage
         new("Inventário", "Inventário", "inventory.png", "inventory_active.png"),
         new("Eventos", "Eventos", "events.png", "events_active.png"),
         new("Membros", "Membros", "members.png", "members_active.png"),
+        new("Documentos", "Documentos", null, null),
         new("Perfil", "Perfil", "profile.png", "profile_active.png"),
         new("Definições", "Definições", "settings.png", "settings_active.png")
     ];
 
     private readonly List<(NavigationSection Section, Border Background, Button Button, Image Icon, Label Label)> navigationItems = [];
     private readonly Grid layoutRoot;
+    private readonly TunaEngineApiClient _apiClient;
     private Border navigationPanel = null!;
     private VerticalStackLayout navigationItemsLayout = null!;
     private Grid headerContentGrid = null!;
@@ -32,8 +35,9 @@ public sealed class MainPage : ContentPage
     private bool isMenuVisible;
     private bool hasAppliedLayout;
 
-    public MainPage()
+    public MainPage(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
         BackgroundColor = ViewTheme.Background;
         Shell.SetNavBarIsVisible(this, false);
 
@@ -529,12 +533,13 @@ public sealed class MainPage : ContentPage
 
         ContentView sectionView = section switch
         {
-            "Inventário" => new InventoryView(),
-            "Eventos" => new EventsView(),
-            "Membros" => new MembersView(),
+            "Inventário" => new InventoryView(_apiClient),
+            "Eventos" => new EventsView(_apiClient),
+            "Membros" => new MembersView(_apiClient),
+            "Documentos" => new DocumentsView(_apiClient),
             "Perfil" => new ProfileView(),
             "Definições" => new SettingsView(),
-            _ => new HomeView(isWideLayout)
+            _ => new HomeView(isWideLayout, _apiClient)
         };
 
         pageContent.Children.Clear();

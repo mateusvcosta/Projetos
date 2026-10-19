@@ -8,6 +8,11 @@ public interface MembersInterface
 
     Task<Members?> GetByIdMember(string id, CancellationToken cancellationToken);
 
+    Task<Members?> Login(
+        string email,
+        string password,
+        CancellationToken cancellationToken);
+
     Task<Members> CreateMember(
         MembersRequest request,
         CancellationToken cancellationToken);

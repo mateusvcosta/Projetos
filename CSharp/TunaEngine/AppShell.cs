@@ -1,15 +1,17 @@
-﻿namespace TunaEngine;
+﻿using TunaEngine.Services;
+
+namespace TunaEngine;
 
 public sealed class AppShell : Shell
 {
-    public AppShell()
+    public AppShell(TunaEngineApiClient apiClient)
     {
         Title = "TunaEngine";
 
         var content = new ShellContent
         {
             Title = "Home",
-            ContentTemplate = new DataTemplate(typeof(MainPage)),
+            ContentTemplate = new DataTemplate(() => new MainPage(apiClient)),
             Route = "MainPage"
         };
         var section = new ShellSection();

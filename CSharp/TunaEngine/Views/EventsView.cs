@@ -1,11 +1,21 @@
+using System.Net.Http;
+using System.Text.Json;
+using TunaEngine.Services;
+
 namespace TunaEngine.Views;
 
 public sealed class EventsView : ContentView
 {
     private readonly VerticalStackLayout _agenda = new() { Spacing = 16 };
+    private readonly TunaEngineApiClient _apiClient;
+    private readonly Label _status = ViewTheme.TextLabel("A carregar eventos...", 13, color: ViewTheme.Muted);
+    private readonly Button _retryButton;
 
-    public EventsView()
+    public EventsView(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
+        _retryButton = ViewTheme.Action("Tentar novamente", LoadEventsAsync, primary: false);
+        _retryButton.IsVisible = false;
         var content = new VerticalStackLayout { Spacing = 24 };
         var title = ViewTheme.TextLabel("Eventos", 30, true);
         SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
@@ -14,12 +24,51 @@ public sealed class EventsView : ContentView
             "Datas e atividades da equipa.",
             14,
             color: ViewTheme.Muted));
+        content.Children.Add(_status);
+        content.Children.Add(_retryButton);
         content.Children.Add(new SessionCalendarView(RefreshAgenda));
         content.Children.Add(ViewTheme.TextLabel("Agenda", 20, true));
         content.Children.Add(_agenda);
         content.Children.Add(ViewTheme.Action("+ Novo evento", AddEvent));
         Content = content;
         RefreshAgenda();
+        _ = LoadEventsAsync();
+    }
+
+    private async Task LoadEventsAsync()
+    {
+        _status.Text = "A carregar eventos...";
+        _status.TextColor = ViewTheme.Muted;
+        _retryButton.IsVisible = false;
+
+        try
+        {
+            var events = await _apiClient.GetAsync<List<ApiEvent>>("api/events");
+            AppSession.Events.Clear();
+            AppSession.Events.AddRange(events.Select(entry =>
+            {
+                var date = entry.Date.Kind == DateTimeKind.Utc
+                    ? entry.Date.ToLocalTime()
+                    : entry.Date;
+                return new AgendaEvent
+                {
+                    Id = entry.Id,
+                    Title = entry.Name,
+                    Description = entry.Location,
+                    Date = date
+                };
+            }));
+
+            _status.Text = events.Count == 0 ? "Não existem eventos na base de dados." : "";
+            RefreshAgenda();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível carregar os eventos: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
+            _retryButton.IsVisible = true;
+        }
     }
 
     private void RefreshAgenda()

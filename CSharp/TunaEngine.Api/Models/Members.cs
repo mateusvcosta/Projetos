@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace TunaEngine.Api.Models;
 
@@ -24,6 +25,10 @@ public sealed class Members
     [BsonElement("Email")]
     public string Email { get; set; } = "";
 
+    [BsonElement("PasswordHash")]
+    [JsonIgnore]
+    public string? PasswordHash { get; set; }
+
     [BsonElement("Phone")]
     public string? Phone { get; set; }
 
@@ -39,6 +44,6 @@ public sealed class Members
     [BsonElement("Instrument")]
     public string? Instrument { get; set; }
 
-    [BsonElement("Obs")]
-    public string? Notes { get; set; }
+    [BsonElement("Password")]
+    public string? Password { get; set; }
 }

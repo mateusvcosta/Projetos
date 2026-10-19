@@ -1,26 +1,40 @@
 using System.Globalization;
+using System.Net.Http;
+using System.Text.Json;
+using TunaEngine.Services;
 
 namespace TunaEngine.Views;
 
 public sealed class InventoryView : ContentView
 {
-    public InventoryView()
+    private readonly TunaEngineApiClient _apiClient;
+    private readonly Label _status = ViewTheme.TextLabel("A carregar inventário...", 13, color: ViewTheme.Muted);
+    private readonly Button _retryButton;
+
+    public InventoryView(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
+        _retryButton = ViewTheme.Action("Tentar novamente", LoadInventoryAsync, primary: false);
+        _retryButton.IsVisible = false;
         Render();
+        _ = LoadInventoryAsync();
     }
 
     private void Render()
     {
+        Content = null;
         var content = new VerticalStackLayout { Spacing = 0 };
         var title = ViewTheme.TextLabel("Inventário", 30, true);
         SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
         title.HeightRequest = 36;
         title.Margin = new Thickness(0, 0, 0, 12);
         content.Children.Add(title);
+        content.Children.Add(_status);
+        content.Children.Add(_retryButton);
 
         var items = AppSession.Tables.SelectMany(table => table.Items).ToList();
-        var total = items.Any(item => !item.UnitCost.HasValue)
-            ? "Custos em falta"
+        var total = items.Any(item => !item.UnitCost.HasValue || !item.Quantity.HasValue)
+            ? "Total indisponível"
             : AppSession.Money(items.Sum(item => item.Quantity * item.UnitCost.GetValueOrDefault()));
         var summaryContent = new VerticalStackLayout
         {
@@ -83,6 +97,44 @@ public sealed class InventoryView : ContentView
         newTableButton.HorizontalOptions = LayoutOptions.Start;
         content.Children.Add(newTableButton);
         Content = content;
+    }
+
+    private async Task LoadInventoryAsync()
+    {
+        _status.Text = "A carregar inventário...";
+        _status.TextColor = ViewTheme.Muted;
+        _retryButton.IsVisible = false;
+
+        try
+        {
+            var items = await _apiClient.GetAsync<List<ApiInventoryItem>>("api/inventory");
+            AppSession.Tables.Clear();
+            foreach (var group in items.GroupBy(item =>
+                         string.IsNullOrWhiteSpace(item.InstrumentType)
+                             ? "Itens"
+                             : item.InstrumentType.Trim()))
+            {
+                var table = new StockTable { Name = group.Key };
+                table.Items.AddRange(group.Select(item => new StockItem
+                {
+                    Id = item.Id,
+                    Name = item.Designation,
+                    Quantity = null,
+                    UnitCost = item.Price
+                }));
+                AppSession.Tables.Add(table);
+            }
+
+            _status.Text = items.Count == 0 ? "Não existem itens no inventário." : "";
+            Render();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível carregar o inventário: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
+            _retryButton.IsVisible = true;
+        }
     }
 
     private View BuildInventoryTable(StockTable table)
@@ -191,10 +243,12 @@ public sealed class InventoryView : ContentView
                 () => RemoveItem(table, capturedItem));
             var row = CreateRow(
                 itemCell,
-                AlignedLabel(item.Quantity.ToString(), TextAlignment.End, Color.FromArgb("#CCCCDD"), 14),
+                AlignedLabel(item.Quantity?.ToString() ?? "—", TextAlignment.End, Color.FromArgb("#CCCCDD"), 14),
                 AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.End, ViewTheme.Muted, 14),
                 AlignedLabel(AppSession.Money(
-                    item.UnitCost.HasValue ? item.UnitCost.Value * item.Quantity : null),
+                    item.UnitCost.HasValue && item.Quantity.HasValue
+                        ? item.UnitCost.Value * item.Quantity.Value
+                        : null),
                     TextAlignment.End, ViewTheme.Muted, 14),
                 editButton,
                 removeButton);
@@ -339,7 +393,7 @@ public sealed class InventoryView : ContentView
             "Continuar",
             "Cancelar",
             keyboard: Keyboard.Numeric,
-            initialValue: item?.Quantity.ToString() ?? "1");
+            initialValue: item?.Quantity?.ToString() ?? "1");
         if (quantityText is null)
         {
             return;
