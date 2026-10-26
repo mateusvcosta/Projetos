@@ -31,9 +31,28 @@ public sealed class InventoryService(
         CancellationToken cancellationToken)
     {
         var id = ObjectId.GenerateNewId().ToString();
-        var item = request.ToDocument(id, DateTime.UtcNow);
+        var inventoryCode = await GetNextInventoryCode(cancellationToken);
+        var item = request.ToDocument(id, inventoryCode, DateTime.UtcNow);
         await inventory.InsertOneAsync(item, cancellationToken: cancellationToken);
         return item;
+    }
+
+    private async Task<string> GetNextInventoryCode(CancellationToken cancellationToken)
+    {
+        var existingCodes = await inventory
+            .Find(FilterDefinition<InventoryItem>.Empty)
+            .Project(item => item.InventoryCode)
+            .ToListAsync(cancellationToken);
+
+        var nextNumber = existingCodes
+            .Select(code => code.StartsWith("INV-", StringComparison.OrdinalIgnoreCase)
+                && int.TryParse(code.AsSpan(4), out var number)
+                    ? number
+                    : 0)
+            .DefaultIfEmpty()
+            .Max() + 1;
+
+        return $"INV-{nextNumber:0000}";
     }
 
     public async Task<bool> UpdateItem(

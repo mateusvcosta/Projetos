@@ -12,7 +12,7 @@
       <CodesignDisableTimestamp>true</CodesignDisableTimestamp>
       <CodesignKeychain></CodesignKeychain>
       <CodesignUseHardenedRuntime></CodesignUseHardenedRuntime>
-      <SourceProjectPath>C:\Users\Hp\OneDrive\Desktop\Projetos\C#\TunaEngine</SourceProjectPath>
+      <SourceProjectPath>C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine</SourceProjectPath>
     </_CodesignBundle>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
 using TunaEngine.Services;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine.Views;
 
@@ -10,6 +11,13 @@ public sealed class InventoryView : ContentView
     private readonly TunaEngineApiClient _apiClient;
     private readonly Label _status = ViewTheme.TextLabel("A carregar inventário...", 13, color: ViewTheme.Muted);
     private readonly Button _retryButton;
+    private readonly Label _totalLabel = ViewTheme.TextLabel("", 22, true);
+    private readonly VerticalStackLayout _tables = new()
+    {
+        Spacing = 16,
+        HorizontalOptions = LayoutOptions.Fill
+    };
+    private bool _isInitialized;
 
     public InventoryView(TunaEngineApiClient apiClient)
     {
@@ -22,7 +30,13 @@ public sealed class InventoryView : ContentView
 
     private void Render()
     {
-        Content = null;
+        if (_isInitialized)
+        {
+            RefreshItems();
+            return;
+        }
+
+        _isInitialized = true;
         var content = new VerticalStackLayout { Spacing = 0 };
         var title = ViewTheme.TextLabel("Inventário", 30, true);
         SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
@@ -32,10 +46,6 @@ public sealed class InventoryView : ContentView
         content.Children.Add(_status);
         content.Children.Add(_retryButton);
 
-        var items = AppSession.Tables.SelectMany(table => table.Items).ToList();
-        var total = items.Any(item => !item.UnitCost.HasValue || !item.Quantity.HasValue)
-            ? "Total indisponível"
-            : AppSession.Money(items.Sum(item => item.Quantity * item.UnitCost.GetValueOrDefault()));
         var summaryContent = new VerticalStackLayout
         {
             Spacing = 6,
@@ -43,24 +53,13 @@ public sealed class InventoryView : ContentView
             Children =
             {
                 ViewTheme.TextLabel("CUSTO TOTAL DO INVENTÁRIO", 11, true, ViewTheme.Muted),
-                ViewTheme.TextLabel(total, 22, true)
+                _totalLabel
             }
         };
         var summary = ViewTheme.Card(summaryContent, 0);
         summary.WidthRequest = 520;
         summary.HeightRequest = 72;
         summary.HorizontalOptions = LayoutOptions.Start;
-
-        var newItemButton = ViewTheme.Action("+ Novo item", async () =>
-        {
-            if (AppSession.Tables.Count > 0)
-                await EditItem(AppSession.Tables[0], null);
-        });
-        newItemButton.WidthRequest = 220;
-        newItemButton.HeightRequest = 48;
-        newItemButton.MinimumHeightRequest = 48;
-        newItemButton.FontSize = 15;
-        newItemButton.Padding = 0;
 
         var summaryRow = new Grid
         {
@@ -75,17 +74,9 @@ public sealed class InventoryView : ContentView
             Margin = new Thickness(0, 0, 0, 24)
         };
         summaryRow.Add(summary, 0, 0);
-        summaryRow.Add(newItemButton, 1, 0);
         content.Children.Add(summaryRow);
 
-        var tables = new VerticalStackLayout
-        {
-            Spacing = 16,
-            HorizontalOptions = LayoutOptions.Fill
-        };
-        foreach (var table in AppSession.Tables)
-            tables.Children.Add(BuildInventoryTable(table));
-        content.Children.Add(tables);
+        content.Children.Add(_tables);
 
         var newTableButton = ViewTheme.Action("+ Nova Tabela", AddTable);
         newTableButton.WidthRequest = 260;
@@ -97,6 +88,22 @@ public sealed class InventoryView : ContentView
         newTableButton.HorizontalOptions = LayoutOptions.Start;
         content.Children.Add(newTableButton);
         Content = content;
+        RefreshItems();
+    }
+
+    private void RefreshItems()
+    {
+        var items = AppSession.Tables.SelectMany(table => table.Items).ToList();
+        _totalLabel.Text = items.Any(item => !item.UnitCost.HasValue)
+            ? "Total indisponível"
+            : AppSession.Money(items.Sum(item => item.UnitCost.GetValueOrDefault()));
+
+        AppSession.Tables.Sort(CompareTableNames);
+        _tables.Children.Clear();
+        foreach (var table in AppSession.Tables)
+        {
+            _tables.Children.Add(BuildInventoryTable(table));
+        }
     }
 
     private async Task LoadInventoryAsync()
@@ -109,18 +116,22 @@ public sealed class InventoryView : ContentView
         {
             var items = await _apiClient.GetAsync<List<ApiInventoryItem>>("api/inventory");
             AppSession.Tables.Clear();
-            foreach (var group in items.GroupBy(item =>
-                         string.IsNullOrWhiteSpace(item.InstrumentType)
-                             ? "Itens"
-                             : item.InstrumentType.Trim()))
+            foreach (var group in items
+                         .GroupBy(item =>
+                             string.IsNullOrWhiteSpace(item.InstrumentType)
+                                 ? "Itens"
+                                 : item.InstrumentType.Trim())
+                         .OrderBy(group => group.Key, StringComparer.CurrentCultureIgnoreCase))
             {
                 var table = new StockTable { Name = group.Key };
                 table.Items.AddRange(group.Select(item => new StockItem
                 {
                     Id = item.Id,
                     Name = item.Designation,
-                    Quantity = null,
-                    UnitCost = item.Price
+                    UnitCost = item.Price,
+                    Condition = item.Condition,
+                    Function = item.Function,
+                    Notes = item.Notes
                 }));
                 AppSession.Tables.Add(table);
             }
@@ -142,10 +153,7 @@ public sealed class InventoryView : ContentView
         var columns = new[]
         {
             new GridLength(480, GridUnitType.Star),
-            new GridLength(100, GridUnitType.Star),
             new GridLength(140, GridUnitType.Star),
-            new GridLength(140, GridUnitType.Star),
-            new GridLength(120, GridUnitType.Star),
             new GridLength(120, GridUnitType.Star)
         };
 
@@ -170,6 +178,11 @@ public sealed class InventoryView : ContentView
         var panel = new VerticalStackLayout { Spacing = 0 };
         var sectionHeader = new Grid
         {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
             Padding = new Thickness(20, 0),
             HeightRequest = 40,
             BackgroundColor = ViewTheme.SurfaceDark
@@ -177,19 +190,29 @@ public sealed class InventoryView : ContentView
         var panelTitle = ViewTheme.TextLabel(
             table.Name.ToUpper(AppSession.Portuguese), 11, true, ViewTheme.Muted);
         sectionHeader.Add(panelTitle, 0, 0);
-        sectionHeader.Add(new BoxView
+        var newItemButton = ViewTheme.Action(
+            "+ Novo item",
+            () => EditItem(table, null),
+            primary: false);
+        newItemButton.WidthRequest = 120;
+        newItemButton.HeightRequest = 32;
+        newItemButton.MinimumHeightRequest = 0;
+        newItemButton.Padding = 0;
+        newItemButton.FontSize = 12;
+        sectionHeader.Add(newItemButton, 1, 0);
+        var sectionHeaderDivider = new BoxView
         {
             HeightRequest = 1,
             Color = ViewTheme.Stroke,
             VerticalOptions = LayoutOptions.End
-        }, 0, 0);
+        };
+        sectionHeader.Add(sectionHeaderDivider, 0, 0);
+        Microsoft.Maui.Controls.Grid.SetColumnSpan(sectionHeaderDivider, 2);
         panel.Children.Add(sectionHeader);
 
         var headings = CreateRow(
             ViewTheme.TextLabel("Item", 12, true, ViewTheme.Muted),
-            AlignedLabel("Qtd.", TextAlignment.End),
             AlignedLabel("Custo/Un.", TextAlignment.End),
-            AlignedLabel("Total", TextAlignment.End),
             CenteredLabel("Editar", ViewTheme.Muted, 12, true),
             CenteredLabel("Remover", ViewTheme.Muted, 12, true));
         headings.HeightRequest = 44;
@@ -243,13 +266,7 @@ public sealed class InventoryView : ContentView
                 () => RemoveItem(table, capturedItem));
             var row = CreateRow(
                 itemCell,
-                AlignedLabel(item.Quantity?.ToString() ?? "—", TextAlignment.End, Color.FromArgb("#CCCCDD"), 14),
                 AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.End, ViewTheme.Muted, 14),
-                AlignedLabel(AppSession.Money(
-                    item.UnitCost.HasValue && item.Quantity.HasValue
-                        ? item.UnitCost.Value * item.Quantity.Value
-                        : null),
-                    TextAlignment.End, ViewTheme.Muted, 14),
                 editButton,
                 removeButton);
             row.HeightRequest = 64;
@@ -331,7 +348,7 @@ public sealed class InventoryView : ContentView
         }, 0, 0);
         visual.Add(ViewTheme.TextLabel(text, 13, true, color), 1, 0);
 
-        var button = new Button
+        var button = new StateButton
         {
             Text = "",
             BackgroundColor = Colors.Transparent,
@@ -342,7 +359,7 @@ public sealed class InventoryView : ContentView
             Opacity = 0
         };
         SemanticProperties.SetDescription(button, text);
-        button.Clicked += async (_, _) => await callback();
+        ViewTheme.BindAction(button, callback);
 
         var action = new Grid { HeightRequest = 64 };
         action.Add(visual);
@@ -368,6 +385,24 @@ public sealed class InventoryView : ContentView
         Render();
     }
 
+    private static int CompareTableNames(StockTable left, StockTable right)
+    {
+        var leftIsNumber = int.TryParse(left.Name.Trim(), out var leftNumber);
+        var rightIsNumber = int.TryParse(right.Name.Trim(), out var rightNumber);
+
+        if (leftIsNumber && rightIsNumber)
+        {
+            return leftNumber.CompareTo(rightNumber);
+        }
+
+        if (leftIsNumber != rightIsNumber)
+        {
+            return leftIsNumber ? -1 : 1;
+        }
+
+        return StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name);
+    }
+
     private async Task EditItem(StockTable table, StockItem? item)
     {
         var shell = Shell.Current;
@@ -376,80 +411,73 @@ public sealed class InventoryView : ContentView
             return;
         }
 
-        var name = await shell.DisplayPromptAsync(
-            item is null ? "Novo item" : "Editar item",
-            "Nome:",
-            "Continuar",
-            "Cancelar",
-            initialValue: item?.Name ?? "");
-        if (string.IsNullOrWhiteSpace(name))
+        var popup = new AddInventoryItemPopup(
+            item?.Name,
+            item?.UnitCost,
+            item?.Condition,
+            item?.Function,
+            item?.Notes);
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage,
+            popup,
+            popup.Completion,
+            popup.Cancel);
+        if (draft is null)
         {
             return;
         }
 
-        var quantityText = await shell.DisplayPromptAsync(
-            "Quantidade",
-            "Introduza uma quantidade inteira:",
-            "Continuar",
-            "Cancelar",
-            keyboard: Keyboard.Numeric,
-            initialValue: item?.Quantity?.ToString() ?? "1");
-        if (quantityText is null)
+        ApiInventoryItem? savedItem;
+        try
         {
-            return;
-        }
-
-        if (!int.TryParse(quantityText, out var quantity) || quantity < 0)
-        {
-            await shell.DisplayAlertAsync(
-                "Quantidade inválida",
-                "Utilize um número inteiro igual ou superior a zero.",
-                "OK");
-            return;
-        }
-
-        var costText = await shell.DisplayPromptAsync(
-            "Custo por unidade",
-            "Deixe vazio se o custo for desconhecido.",
-            "Guardar",
-            "Cancelar",
-            keyboard: Keyboard.Numeric,
-            initialValue: item?.UnitCost?.ToString(AppSession.Portuguese) ?? "");
-        if (costText is null)
-        {
-            return;
-        }
-
-        decimal? cost = null;
-        if (!string.IsNullOrWhiteSpace(costText))
-        {
-            if (!decimal.TryParse(
-                    costText,
-                    NumberStyles.Number,
-                    AppSession.Portuguese,
-                    out var parsedCost) ||
-                parsedCost < 0)
+            var request = new ApiInventoryItemRequest
             {
-                await shell.DisplayAlertAsync(
-                    "Custo inválido",
-                    "Utilize um valor positivo, por exemplo 12,50.",
-                    "OK");
-                return;
+                Designation = draft.Name,
+                InstrumentType = table.Name,
+                Price = draft.UnitCost,
+                Condition = draft.Condition,
+                Function = draft.Function,
+                Notes = draft.Notes
+            };
+            if (item is null)
+            {
+                savedItem = await _apiClient.PostAsync<ApiInventoryItem>("api/inventory", request);
             }
-
-            cost = parsedCost;
+            else
+            {
+                await _apiClient.PutAsync($"api/inventory/{item.Id}", request);
+                savedItem = null;
+            }
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or
+            InvalidOperationException)
+        {
+            var message = $"Não foi possível guardar o item: {exception.Message}";
+            _status.Text = message;
+            _status.TextColor = ViewTheme.Error;
+            await shell.DisplayAlertAsync("Inventário", message, "OK");
+            return;
         }
 
         item ??= new StockItem();
-        item.Name = name.Trim();
-        item.Quantity = quantity;
-        item.UnitCost = cost;
+        if (savedItem is not null)
+        {
+            item.Id = savedItem.Id;
+        }
+        item.Name = draft.Name;
+        item.UnitCost = draft.UnitCost;
+        item.Condition = draft.Condition;
+        item.Function = draft.Function;
+        item.Notes = draft.Notes;
         if (!table.Items.Contains(item))
         {
             table.Items.Add(item);
         }
 
-        Render();
+        await LoadInventoryAsync();
+        _status.Text = $"Item '{draft.Name}' guardado na base de dados.";
+        _status.TextColor = ViewTheme.Muted;
     }
 
     private async Task RemoveItem(StockTable table, StockItem item)
@@ -470,6 +498,17 @@ public sealed class InventoryView : ContentView
             return;
         }
 
+        try
+        {
+            await _apiClient.DeleteAsync($"api/inventory/{item.Id}");
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível remover o item: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
+            return;
+        }
         table.Items.Remove(item);
         Render();
     }

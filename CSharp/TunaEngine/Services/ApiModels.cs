@@ -8,13 +8,61 @@ public sealed class ApiInventoryItem
     public string Designation { get; set; } = "";
     public string? InstrumentType { get; set; }
     public decimal? Price { get; set; }
+    public string? Condition { get; set; }
+    public string? Function { get; set; }
+
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+}
+
+public sealed class ApiInventoryItemRequest
+{
+    public string Designation { get; init; } = "";
+    public string? InstrumentType { get; init; }
+    public decimal? Price { get; init; }
+    public string? Condition { get; init; }
+    public string? Function { get; init; }
+    public string? Notes { get; init; }
 }
 
 public sealed class ApiMember
 {
+    [JsonPropertyName("id_Member")]
     public string Id { get; set; } = "";
+
     public string Name { get; set; } = "";
+
+    [JsonPropertyName("tuna_Name")]
+    public string? TunaName { get; set; }
+
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+
+    [JsonPropertyName("num_Student")]
+    public string? StudentNumber { get; set; }
+
+    [JsonPropertyName("id_Role")]
     public string? RoleId { get; set; }
+
+    [JsonPropertyName("voice_Type")]
+    public string? VoiceType { get; set; }
+
+    public string? Instrument { get; set; }
+    public string? Password { get; set; }
+}
+
+public sealed class ApiLoginRequest
+{
+    public string Email { get; init; } = "";
+    public string Password { get; init; } = "";
+}
+
+public sealed class ApiLoginResponse
+{
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Email { get; init; } = "";
+    public string? RoleId { get; init; }
 }
 
 public sealed class ApiRole

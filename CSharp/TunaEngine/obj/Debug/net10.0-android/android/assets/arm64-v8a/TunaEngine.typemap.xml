@@ -1,10 +1,10 @@
-<api type="debug" assembly-name="TunaEngine" mvid="b867991d44bf4d8aa477b4e349fca7cc">
+<api type="debug" assembly-name="TunaEngine" mvid="aa37898504cb469da89099f5cc17c757">
   <java-to-managed>
-    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554452" />
-    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554453" />
+    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554453" />
+    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554454" />
   </java-to-managed>
   <managed-to-java>
-    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554452" />
-    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554453" />
+    <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554453" />
+    <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554454" />
   </managed-to-java>
 </api>

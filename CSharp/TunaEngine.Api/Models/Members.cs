@@ -45,5 +45,6 @@ public sealed class Members
     public string? Instrument { get; set; }
 
     [BsonElement("Password")]
+    [JsonIgnore]
     public string? Password { get; set; }
 }

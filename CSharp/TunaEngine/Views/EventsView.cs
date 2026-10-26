@@ -270,7 +270,7 @@ internal sealed class SessionCalendarView : ContentView
 
     private Button CreateMonthButton(string text, int offset)
     {
-        var button = new Button
+        var button = new StateButton
         {
             Text = text,
             FontSize = 14,

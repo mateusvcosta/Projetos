@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using TunaEngine.Services;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine.Views;
 
@@ -9,6 +10,12 @@ public sealed class MembersView : ContentView
     private readonly TunaEngineApiClient _apiClient;
     private readonly Label _status = ViewTheme.TextLabel("A carregar membros...", 13, color: ViewTheme.Muted);
     private readonly Button _retryButton;
+    private readonly VerticalStackLayout _table = new()
+    {
+        Spacing = 0,
+        HorizontalOptions = LayoutOptions.Fill
+    };
+    private bool _isInitialized;
 
     private static readonly Color[] AvatarColors =
     [
@@ -28,7 +35,13 @@ public sealed class MembersView : ContentView
 
     private void Render()
     {
-        Content = null;
+        if (_isInitialized)
+        {
+            RefreshRows();
+            return;
+        }
+
+        _isInitialized = true;
         var content = new VerticalStackLayout
         {
             Spacing = 0,
@@ -76,17 +89,6 @@ public sealed class MembersView : ContentView
         content.Children.Add(_status);
         content.Children.Add(_retryButton);
 
-        var table = new VerticalStackLayout
-        {
-            Spacing = 0,
-            HorizontalOptions = LayoutOptions.Fill
-        };
-        table.Children.Add(BuildTableHeader());
-        for (var index = 0; index < AppSession.Members.Count; index++)
-        {
-            table.Children.Add(BuildMemberRow(AppSession.Members[index], index));
-        }
-
         content.Children.Add(new Border
         {
             BackgroundColor = ViewTheme.Surface,
@@ -94,10 +96,21 @@ public sealed class MembersView : ContentView
             StrokeThickness = 1,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
             Padding = 0,
-            Content = table
+            Content = _table
         });
 
         Content = content;
+        RefreshRows();
+    }
+
+    private void RefreshRows()
+    {
+        _table.Children.Clear();
+        _table.Children.Add(BuildTableHeader());
+        for (var index = 0; index < AppSession.Members.Count; index++)
+        {
+            _table.Children.Add(BuildMemberRow(AppSession.Members[index], index));
+        }
     }
 
     private async Task LoadMembersAsync()
@@ -108,28 +121,54 @@ public sealed class MembersView : ContentView
 
         try
         {
-            var memberTask = _apiClient.GetAsync<List<ApiMember>>("api/members");
-            var roleTask = _apiClient.GetAsync<List<ApiRole>>("api/roles");
-            await Task.WhenAll(memberTask, roleTask);
-            var roles = await roleTask;
-            var members = await memberTask;
+            var members = await _apiClient.GetAsync<List<ApiMember>>("api/members");
 
             AppSession.Members.Clear();
-            AppSession.Members.AddRange(members.Select(member =>
+            AppSession.Members.AddRange(members.Select(member => new TeamMember
             {
-                var role = roles.FirstOrDefault(candidate =>
-                    string.Equals(candidate.Id, member.RoleId, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(candidate.RoleCode, member.RoleId, StringComparison.OrdinalIgnoreCase));
-                return new TeamMember
-                {
-                    Id = member.Id,
-                    Name = member.Name,
-                    Role = role?.Name ?? member.RoleId ?? "Membro"
-                };
+                Id = member.Id,
+                Name = member.Name,
+                Role = member.RoleId ?? "Membro",
+                TunaName = member.TunaName ?? "",
+                Email = member.Email ?? "",
+                Phone = member.Phone ?? "",
+                StudentNumber = member.StudentNumber ?? "",
+                VoiceType = member.VoiceType ?? "",
+                Instrument = member.Instrument ?? "",
+                Password = member.Password ?? ""
             }));
 
             _status.Text = members.Count == 0 ? "Não existem membros na base de dados." : "";
-            Render();
+            RefreshRows();
+
+            if (members.Count == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                var roles = await _apiClient.GetAsync<List<ApiRole>>("api/roles");
+                foreach (var member in AppSession.Members)
+                {
+                    var role = roles.FirstOrDefault(candidate =>
+                        string.Equals(candidate.Id, member.Role, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(candidate.RoleCode, member.Role, StringComparison.OrdinalIgnoreCase));
+                    if (role is not null)
+                    {
+                        member.Role = role.Name;
+                    }
+                }
+
+                _status.Text = "";
+                RefreshRows();
+            }
+            catch (Exception roleException) when (
+                roleException is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+            {
+                _status.Text = $"Os membros foram carregados, mas não foi possível carregar os cargos: {roleException.Message}";
+                _status.TextColor = ViewTheme.Error;
+            }
         }
         catch (Exception exception) when (
             exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
@@ -194,7 +233,7 @@ public sealed class MembersView : ContentView
         {
             Padding = new Thickness(0)
         };
-        var actionButton = new Button
+        var actionButton = new StateButton
         {
             Text = "•••",
             FontSize = 18,
@@ -208,7 +247,7 @@ public sealed class MembersView : ContentView
             VerticalOptions = LayoutOptions.Center
         };
         SemanticProperties.SetDescription(actionButton, $"Ações para {member.Name}");
-        actionButton.Clicked += async (_, _) => await MemberActions(member);
+        ViewTheme.BindAction(actionButton, () => MemberActions(member));
         actionCell.Add(actionButton);
         row.Add(actionCell, 2, 0);
 
@@ -289,31 +328,27 @@ public sealed class MembersView : ContentView
             return;
         }
 
-        var name = await shell.DisplayPromptAsync(
-            member is null ? "Novo membro" : "Editar membro",
-            "Nome:",
-            "Continuar",
-            "Cancelar",
-            initialValue: member?.Name ?? "");
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
-
-        var role = await shell.DisplayPromptAsync(
-            "Cargo",
-            "Cargo na equipa:",
-            "Guardar",
-            "Cancelar",
-            initialValue: member?.Role ?? "Tuno");
-        if (string.IsNullOrWhiteSpace(role))
+        var popup = new AddMemberPopup(member);
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage,
+            popup,
+            popup.Completion,
+            popup.Cancel);
+        if (draft is null)
         {
             return;
         }
 
         member ??= new TeamMember();
-        member.Name = name.Trim();
-        member.Role = role.Trim();
+        member.Name = draft.Name;
+        member.Role = draft.Role;
+        member.TunaName = draft.TunaName;
+        member.Email = draft.Email;
+        member.Phone = draft.Phone;
+        member.StudentNumber = draft.StudentNumber;
+        member.VoiceType = draft.VoiceType;
+        member.Instrument = draft.Instrument;
+        member.Password = draft.Password;
         if (!AppSession.Members.Contains(member))
         {
             AppSession.Members.Add(member);

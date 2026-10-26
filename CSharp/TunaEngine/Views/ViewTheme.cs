@@ -151,7 +151,7 @@ internal static class ViewTheme
 
     public static Button Action(string text, Func<Task> callback, bool primary = true)
     {
-        var button = new Button
+        var button = new StateButton
         {
             Text = text,
             FontSize = 14,
@@ -162,8 +162,51 @@ internal static class ViewTheme
             Padding = new Thickness(18, 10),
             MinimumHeightRequest = 44
         };
-        button.Clicked += async (_, _) => await callback();
+        BindAction(button, callback);
         return button;
+    }
+
+    public static void BindAction(Button button, Func<Task> callback)
+    {
+        var isProcessing = false;
+        var originalText = button.Text;
+
+        button.Clicked += async (_, _) =>
+        {
+            if (isProcessing)
+            {
+                return;
+            }
+
+            isProcessing = true;
+            button.IsEnabled = false;
+            if (!string.IsNullOrWhiteSpace(originalText))
+            {
+                button.Text = "A processar...";
+            }
+
+            try
+            {
+                await callback();
+            }
+            catch (Exception exception)
+            {
+                var shell = Shell.Current;
+                if (shell is not null)
+                {
+                    await shell.DisplayAlertAsync(
+                        "Erro",
+                        $"Não foi possível concluir a operação: {exception.Message}",
+                        "OK");
+                }
+            }
+            finally
+            {
+                button.Text = originalText;
+                button.IsEnabled = true;
+                isProcessing = false;
+            }
+        };
     }
 
     private static Color GetColor(string key) =>

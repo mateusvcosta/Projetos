@@ -6,8 +6,10 @@ internal sealed class StockItem
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public int? Quantity { get; set; }
     public decimal? UnitCost { get; set; }
+    public string? Condition { get; set; }
+    public string? Function { get; set; }
+    public string? Notes { get; set; }
 }
 
 internal sealed class StockTable
@@ -21,6 +23,13 @@ internal sealed class TeamMember
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string Role { get; set; } = "Tuno";
+    public string TunaName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public string StudentNumber { get; set; } = "";
+    public string VoiceType { get; set; } = "";
+    public string Instrument { get; set; } = "";
+    public string Password { get; set; } = "";
 }
 
 internal sealed class AgendaEvent

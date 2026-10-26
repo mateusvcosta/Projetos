@@ -42,17 +42,38 @@ public sealed class MembersService(
             .Find(filter)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (member?.PasswordHash is null)
+        if (member is null)
         {
             return null;
         }
 
-        var verificationResult = passwordHasher.VerifyHashedPassword(
-            member,
-            member.PasswordHash,
-            password);
+        if (!string.IsNullOrWhiteSpace(member.PasswordHash))
+        {
+            var verificationResult = passwordHasher.VerifyHashedPassword(
+                member,
+                member.PasswordHash,
+                password);
 
-        return verificationResult == PasswordVerificationResult.Failed ? null : member;
+            return verificationResult == PasswordVerificationResult.Failed ? null : member;
+        }
+
+        if (!string.Equals(member.Password, password, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var migratedPasswordHash = passwordHasher.HashPassword(member, password);
+        var migration = Builders<Members>.Update
+            .Set(existingMember => existingMember.PasswordHash, migratedPasswordHash)
+            .Unset(nameof(Members.Password));
+        await members.UpdateOneAsync(
+            existingMember => existingMember.Id == member.Id,
+            migration,
+            cancellationToken: cancellationToken);
+
+        member.PasswordHash = migratedPasswordHash;
+        member.Password = null;
+        return member;
     }
 
     public async Task<Members> CreateMember(

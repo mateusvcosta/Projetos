@@ -26,10 +26,13 @@ public sealed class InventoryItemRequest
         return errors;
     }
 
-    public InventoryItem ToDocument(string id, DateTime dateAdded) => new()
+    public InventoryItem ToDocument(
+        string id,
+        string inventoryCode,
+        DateTime dateAdded) => new()
     {
         Id = id,
-        InventoryCode = $"INV-{id}",
+        InventoryCode = inventoryCode,
         DateAdded = dateAdded,
         Designation = Designation!.Trim(),
         InstrumentType = InstrumentType?.Trim(),

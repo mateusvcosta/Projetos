@@ -46,23 +46,3 @@ build_metadata.AdditionalFiles.Inflator = SourceGen
 build_metadata.AdditionalFiles.NoWarn = 
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
-
-[C:/Users/Hp/OneDrive/Desktop/Projetos/CSharp/TunaEngine/Views/Popups/AddInventoryItemPopup.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = TunaEngine.Views.Popups.AddInventoryItemPopup.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Popups\AddInventoryItemPopup.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Popups\AddInventoryItemPopup.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 
-
-[C:/Users/Hp/OneDrive/Desktop/Projetos/CSharp/TunaEngine/Views/Popups/AddMemberPopup.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = TunaEngine.Views.Popups.AddMemberPopup.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Popups\AddMemberPopup.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Popups\AddMemberPopup.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 

@@ -1,5 +1,7 @@
 ﻿obj\Debug\net10.0-android\resizetizer\r\drawable\gemini_generated_image_yl4ruryl4ruryl4r.jpg
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\bell.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\documents.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\documents_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\dotnet_bot.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\events.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\events_active.png
@@ -20,6 +22,8 @@ obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\settings_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\stand.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-hdpi\trash.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\bell.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\documents.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\documents_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\dotnet_bot.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\events.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\events_active.png
@@ -40,6 +44,8 @@ obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\settings_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\stand.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-mdpi\trash.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\bell.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\documents.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\documents_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\dotnet_bot.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\events.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\events_active.png
@@ -60,6 +66,8 @@ obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\settings_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\stand.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xhdpi\trash.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\bell.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\documents.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\documents_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\dotnet_bot.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\events.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\events_active.png
@@ -80,6 +88,8 @@ obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\settings_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\stand.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxhdpi\trash.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\bell.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\documents.png
+obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\documents_active.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\dotnet_bot.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\events.png
 obj\Debug\net10.0-android\resizetizer\r\drawable-xxxhdpi\events_active.png

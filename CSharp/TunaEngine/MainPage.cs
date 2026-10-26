@@ -14,7 +14,7 @@ public sealed class MainPage : ContentPage
         new("Inventário", "Inventário", "inventory.png", "inventory_active.png"),
         new("Eventos", "Eventos", "events.png", "events_active.png"),
         new("Membros", "Membros", "members.png", "members_active.png"),
-        new("Documentos", "Documentos", null, null),
+        new("Documentos", "Documentos", "documents.png", "documents_active.png"),
         new("Perfil", "Perfil", "profile.png", "profile_active.png"),
         new("Definições", "Definições", "settings.png", "settings_active.png")
     ];
@@ -123,7 +123,7 @@ public sealed class MainPage : ContentPage
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
             InputTransparent = true
         };
-        var button = new Button
+        var button = new StateButton
         {
             Text = string.Empty,
             AutomationId = $"Navigate{section.Title}",
@@ -135,9 +135,35 @@ public sealed class MainPage : ContentPage
             MinimumWidthRequest = 0,
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill,
-            Opacity = 0
+            Opacity = 1
         };
         SemanticProperties.SetDescription(button, $"Navegar para {section.Title}");
+        var pointer = new PointerGestureRecognizer();
+        pointer.PointerEntered += (_, _) =>
+        {
+            if (currentSection != section.Title)
+            {
+                background.BackgroundColor = ViewTheme.SurfaceDark;
+            }
+        };
+        pointer.PointerExited += (_, _) => ResetNavigationFeedback(section.Title, background);
+        button.GestureRecognizers.Add(pointer);
+        button.Pressed += (_, _) =>
+        {
+            if (currentSection != section.Title)
+            {
+                background.BackgroundColor = ViewTheme.Surface;
+            }
+        };
+        button.Released += (_, _) => ResetNavigationFeedback(section.Title, background);
+        button.Focused += (_, _) =>
+        {
+            if (currentSection != section.Title)
+            {
+                background.BackgroundColor = ViewTheme.SurfaceDark;
+            }
+        };
+        button.Unfocused += (_, _) => ResetNavigationFeedback(section.Title, background);
         button.Clicked += (_, _) => ShowSection(section.Title);
 
         var container = new Grid
@@ -256,6 +282,23 @@ public sealed class MainPage : ContentPage
             Padding = new Thickness(12, 8),
             Content = accountLayout
         };
+        var accountButton = new Button
+        {
+            Text = string.Empty,
+            BackgroundColor = Colors.Transparent,
+            BorderWidth = 0,
+            Padding = 0,
+            MinimumWidthRequest = 0,
+            MinimumHeightRequest = 0,
+            HorizontalOptions = LayoutOptions.Fill,
+            VerticalOptions = LayoutOptions.Fill,
+            AutomationId = "NavigateProfile"
+        };
+        SemanticProperties.SetDescription(accountButton, "Abrir perfil");
+        accountButton.Clicked += (_, _) => ShowSection("Perfil");
+        var accountContainer = new Grid();
+        accountContainer.Add(account);
+        accountContainer.Add(accountButton);
         var navigationContent = new Grid
         {
             RowDefinitions =
@@ -265,7 +308,7 @@ public sealed class MainPage : ContentPage
             }
         };
         navigationContent.Add(navigationScroll, 0, 0);
-        navigationContent.Add(account, 0, 1);
+        navigationContent.Add(accountContainer, 0, 1);
         navigationPanel = new Border
         {
             BackgroundColor = ViewTheme.Sidebar,
@@ -293,7 +336,7 @@ public sealed class MainPage : ContentPage
             Margin = new Thickness(40, 0, 0, 0),
             HorizontalOptions = LayoutOptions.Start
         };
-        menuButton = new Button
+        menuButton = new StateButton
         {
             Text = "☰",
             FontSize = 16,
@@ -337,7 +380,7 @@ public sealed class MainPage : ContentPage
             HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center
         });
-        notificationsButton = new Button
+        notificationsButton = new StateButton
         {
             Text = string.Empty,
             BackgroundColor = Colors.Transparent,
@@ -379,6 +422,13 @@ public sealed class MainPage : ContentPage
         root.Add(contentScroll, 1, 1);
         Content = root;
         return root;
+    }
+
+    private void ResetNavigationFeedback(string section, Border background)
+    {
+        background.BackgroundColor = currentSection == section
+            ? ViewTheme.Accent
+            : Colors.Transparent;
     }
 
     private static VerticalStackLayout CreateAccountLabels()
