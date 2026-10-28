@@ -8,7 +8,7 @@ public sealed class AddMemberPopup : ContentView
     private readonly TaskCompletionSource<MemberDraft?> _completion =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Entry _nameEntry;
-    private readonly Entry _roleEntry;
+    private readonly Picker _rolePicker;
     private readonly Entry _tunaNameEntry;
     private readonly Entry _emailEntry;
     private readonly Entry _phoneEntry;
@@ -22,13 +22,33 @@ public sealed class AddMemberPopup : ContentView
 
     public Task<MemberDraft?> Completion => _completion.Task;
 
-    internal AddMemberPopup(TeamMember? member = null)
+    internal AddMemberPopup(TeamMember? member = null, IEnumerable<string>? roles = null)
     {
         BackgroundColor = Colors.Transparent;
         Padding = 0;
 
         _nameEntry = CreateEntry("Nome do membro", 80);
-        _roleEntry = CreateEntry("Cargo", 60);
+        var roleOptions = (roles ?? [])
+            .Where(role => !string.IsNullOrWhiteSpace(role))
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        if (member is not null
+            && !roleOptions.Contains(member.Role, StringComparer.CurrentCultureIgnoreCase))
+        {
+            roleOptions.Insert(0, member.Role);
+        }
+
+        _rolePicker = new Picker
+        {
+            Title = "Selecionar cargo",
+            TitleColor = ViewTheme.Muted,
+            TextColor = ViewTheme.Text,
+            BackgroundColor = Colors.Transparent,
+            FontSize = 13,
+            ItemsSource = roleOptions,
+            SelectedItem = member?.Role ?? roleOptions.FirstOrDefault(),
+            VerticalOptions = LayoutOptions.Fill
+        };
         _tunaNameEntry = CreateEntry("Nome da tuna", 100);
         _emailEntry = CreateEntry("Email", 160);
         _phoneEntry = CreateEntry("Telefone", 30);
@@ -39,7 +59,6 @@ public sealed class AddMemberPopup : ContentView
         _passwordEntry.IsPassword = true;
 
         _nameEntry.Text = member?.Name;
-        _roleEntry.Text = member?.Role ?? "Tuno";
         _tunaNameEntry.Text = member?.TunaName;
         _emailEntry.Text = member?.Email;
         _phoneEntry.Text = member?.Phone;
@@ -83,9 +102,9 @@ public sealed class AddMemberPopup : ContentView
             RowSpacing = 10,
             ColumnSpacing = 10
         };
-        var entries = new[]
+        View[] entries =
         {
-            _nameEntry, _roleEntry, _tunaNameEntry, _emailEntry,
+            _nameEntry, CreateRoleControl(), _tunaNameEntry, _emailEntry,
             _phoneEntry, _studentNumberEntry, _voiceTypeEntry, _instrumentEntry,
             _passwordEntry
         };
@@ -176,7 +195,7 @@ public sealed class AddMemberPopup : ContentView
     private void Save()
     {
         var name = _nameEntry.Text?.Trim();
-        var role = _roleEntry.Text?.Trim();
+        var role = (_rolePicker.SelectedItem as string)?.Trim();
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(role))
         {
             _errorLabel.Text = "Introduza o nome e o cargo do membro.";
@@ -198,6 +217,18 @@ public sealed class AddMemberPopup : ContentView
 
     public void Cancel() =>
         MainThread.BeginInvokeOnMainThread(() => _completion.TrySetResult(null));
+
+    private View CreateRoleControl() =>
+        new Border
+        {
+            HeightRequest = 38,
+            BackgroundColor = ViewTheme.SurfaceDark,
+            Stroke = ViewTheme.Stroke,
+            StrokeThickness = 1,
+            StrokeShape = new RoundRectangle { CornerRadius = 7 },
+            Padding = new Thickness(8, 0),
+            Content = _rolePicker
+        };
 }
 
 public sealed record MemberDraft(

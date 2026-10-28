@@ -1,13 +1,22 @@
+using System.Net.Http;
+using System.Text.Json;
+using TunaEngine.Services;
+
 namespace TunaEngine.Views;
 
 public sealed class ProfileView : ContentView
 {
-    private readonly Label _nameValue = ViewTheme.TextLabel(AppSession.ProfileName, 14, false, Color.FromArgb("#CCCCDD"));
-    private readonly Label _emailValue = ViewTheme.TextLabel(AppSession.ProfileEmail, 14, false, Color.FromArgb("#CCCCDD"));
-    private readonly Label _roleValue = ViewTheme.TextLabel(AppSession.ProfileRole, 14, false, Color.FromArgb("#CCCCDD"));
+    private readonly TunaEngineApiClient _apiClient;
+    private readonly Label _nameValue = CreateValueLabel();
+    private readonly Label _emailValue = CreateValueLabel();
+    private readonly Label _roleValue = CreateValueLabel();
+    private readonly Label _heroTitle = ViewTheme.TextLabel("", 26, true, ViewTheme.Text);
+    private readonly Label _heroDescription = ViewTheme.TextLabel("", 14, color: ViewTheme.Muted);
+    private readonly Label _statusLabel = ViewTheme.TextLabel("", 12, color: ViewTheme.Muted);
 
-    public ProfileView()
+    public ProfileView(TunaEngineApiClient apiClient)
     {
+        _apiClient = apiClient;
         var content = new VerticalStackLayout { Spacing = 24 };
         content.Children.Add(CreateHeroCard());
 
@@ -26,6 +35,8 @@ public sealed class ProfileView : ContentView
         content.Children.Add(summaryGrid);
 
         Content = content;
+        UpdateLabels();
+        _ = LoadMemberAsync();
     }
 
     private async Task EditProfile()
@@ -61,9 +72,7 @@ public sealed class ProfileView : ContentView
         AppSession.ProfileName = name.Trim();
         AppSession.ProfileEmail = email.Trim();
         AppSession.ProfileRole = role.Trim();
-        _nameValue.Text = AppSession.ProfileName;
-        _emailValue.Text = AppSession.ProfileEmail;
-        _roleValue.Text = AppSession.ProfileRole;
+        UpdateLabels();
     }
 
     private Border CreateHeroCard()
@@ -78,12 +87,12 @@ public sealed class ProfileView : ContentView
         };
 
         var heroText = new VerticalStackLayout { Spacing = 6 };
-        heroText.Children.Add(ViewTheme.TextLabel("Perfil de demonstração", 26, true, ViewTheme.Text));
-        heroText.Children.Add(ViewTheme.TextLabel("Conteúdo de demonstração · sem dados reais", 14, color: ViewTheme.Muted));
+        heroText.Children.Add(_heroTitle);
+        heroText.Children.Add(_heroDescription);
 
         var chips = new HorizontalStackLayout { Spacing = 8, Margin = new Thickness(0, 1, 0, 0) };
-        chips.Children.Add(CreateStatusChip("Demonstração", "#1A3A2A", "#4ADE80"));
-        chips.Children.Add(ViewTheme.TextLabel("Sem dados reais", 12, color: Color.FromArgb("#A3A3B8")));
+        chips.Children.Add(CreateStatusChip("Membro", "#1A3A2A", "#4ADE80"));
+        chips.Children.Add(_statusLabel);
         heroText.Children.Add(chips);
 
         var heroLayout = new Grid
@@ -123,6 +132,73 @@ public sealed class ProfileView : ContentView
             Content = heroLayout
         };
     }
+
+    private async Task LoadMemberAsync()
+    {
+        if (string.IsNullOrWhiteSpace(AppSession.ProfileMemberId))
+        {
+            return;
+        }
+
+        try
+        {
+            var member = await _apiClient.GetAsync<ApiMember>(
+                $"api/members/{AppSession.ProfileMemberId}");
+            AppSession.ProfileName = member.Name;
+            AppSession.ProfileEmail = member.Email ?? "";
+            AppSession.ProfileTunaName = member.TunaName ?? "";
+            AppSession.ProfilePhone = member.Phone ?? "";
+            AppSession.ProfileStudentNumber = member.StudentNumber ?? "";
+            AppSession.ProfileVoiceType = member.VoiceType ?? "";
+            AppSession.ProfileInstrument = member.Instrument ?? "";
+            AppSession.ProfileRole = member.RoleId ?? "";
+
+            try
+            {
+                var roles = await _apiClient.GetAsync<List<ApiRole>>("api/roles");
+                var role = roles.FirstOrDefault(candidate =>
+                    string.Equals(candidate.Id, member.RoleId, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(candidate.RoleCode, member.RoleId, StringComparison.OrdinalIgnoreCase));
+                if (role is not null)
+                {
+                    AppSession.ProfileRole = role.Name;
+                }
+            }
+            catch (Exception exception) when (
+                exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+            {
+                _statusLabel.Text = "Cargo indisponível";
+            }
+
+            UpdateLabels();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _statusLabel.Text = "Não foi possível carregar os dados do perfil.";
+        }
+    }
+
+    private void UpdateLabels()
+    {
+        _nameValue.Text = ValueOrDash(AppSession.ProfileName);
+        _emailValue.Text = ValueOrDash(AppSession.ProfileEmail);
+        _roleValue.Text = ValueOrDash(AppSession.ProfileRole);
+        _heroTitle.Text = ValueOrDash(AppSession.ProfileName);
+        _heroDescription.Text = string.IsNullOrWhiteSpace(AppSession.ProfileTunaName)
+            ? "Perfil do membro"
+            : AppSession.ProfileTunaName;
+        if (string.IsNullOrWhiteSpace(_statusLabel.Text))
+        {
+            _statusLabel.Text = "Dados da base de dados";
+        }
+    }
+
+    private static Label CreateValueLabel() =>
+        ViewTheme.TextLabel("", 14, false, Color.FromArgb("#CCCCDD"));
+
+    private static string ValueOrDash(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
 
     private Border CreateDetailsCard()
     {

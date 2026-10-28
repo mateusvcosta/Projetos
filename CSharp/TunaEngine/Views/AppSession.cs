@@ -59,8 +59,14 @@ internal static class AppSession
     public static List<TeamMember> Members { get; } = [];
     public static List<AgendaEvent> Events { get; } = [];
     public static string ProfileName { get; set; } = "";
+    public static string ProfileMemberId { get; set; } = "";
     public static string ProfileEmail { get; set; } = "";
     public static string ProfileRole { get; set; } = "";
+    public static string ProfileTunaName { get; set; } = "";
+    public static string ProfilePhone { get; set; } = "";
+    public static string ProfileStudentNumber { get; set; } = "";
+    public static string ProfileVoiceType { get; set; } = "";
+    public static string ProfileInstrument { get; set; } = "";
 
     public static string Money(decimal? value) =>
         value.HasValue ? value.Value.ToString("C", Portuguese) : "—";

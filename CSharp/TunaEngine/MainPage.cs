@@ -587,7 +587,7 @@ public sealed class MainPage : ContentPage
             "Eventos" => new EventsView(_apiClient),
             "Membros" => new MembersView(_apiClient),
             "Documentos" => new DocumentsView(_apiClient),
-            "Perfil" => new ProfileView(),
+            "Perfil" => new ProfileView(_apiClient),
             "Definições" => new SettingsView(),
             _ => new HomeView(isWideLayout, _apiClient)
         };

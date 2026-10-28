@@ -19,8 +19,10 @@ public sealed class AppShell : Shell
             Title = "Entrar",
             ContentTemplate = new DataTemplate(() => new LoginView(apiClient, response =>
             {
+                AppSession.ProfileMemberId = response.Id;
                 AppSession.ProfileName = response.Name;
                 AppSession.ProfileEmail = response.Email;
+                AppSession.ProfileRole = response.RoleId ?? "";
                 ShowMain(apiClient);
             })),
             Route = "Login"

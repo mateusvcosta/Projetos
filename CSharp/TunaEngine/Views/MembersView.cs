@@ -10,6 +10,7 @@ public sealed class MembersView : ContentView
     private readonly TunaEngineApiClient _apiClient;
     private readonly Label _status = ViewTheme.TextLabel("A carregar membros...", 13, color: ViewTheme.Muted);
     private readonly Button _retryButton;
+    private readonly List<string> _roleNames = [];
     private readonly VerticalStackLayout _table = new()
     {
         Spacing = 0,
@@ -149,6 +150,11 @@ public sealed class MembersView : ContentView
             try
             {
                 var roles = await _apiClient.GetAsync<List<ApiRole>>("api/roles");
+                _roleNames.Clear();
+                _roleNames.AddRange(roles
+                    .Select(role => role.Name)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct(StringComparer.CurrentCultureIgnoreCase));
                 foreach (var member in AppSession.Members)
                 {
                     var role = roles.FirstOrDefault(candidate =>
@@ -328,7 +334,26 @@ public sealed class MembersView : ContentView
             return;
         }
 
-        var popup = new AddMemberPopup(member);
+        if (_roleNames.Count == 0)
+        {
+            try
+            {
+                var roles = await _apiClient.GetAsync<List<ApiRole>>("api/roles");
+                _roleNames.AddRange(roles
+                    .Select(role => role.Name)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct(StringComparer.CurrentCultureIgnoreCase));
+            }
+            catch (Exception exception) when (
+                exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+            {
+                _status.Text = $"Não foi possível carregar os cargos: {exception.Message}";
+                _status.TextColor = ViewTheme.Error;
+                return;
+            }
+        }
+
+        var popup = new AddMemberPopup(member, _roleNames);
         var draft = await ModalOverlay.ShowAsync(
             shell.CurrentPage,
             popup,

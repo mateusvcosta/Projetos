@@ -27,8 +27,11 @@ public sealed class ApiInventoryItemRequest
 
 public sealed class ApiMember
 {
-    [JsonPropertyName("id_Member")]
+    [JsonPropertyName("id")]
     public string Id { get; set; } = "";
+
+    [JsonPropertyName("id_Member")]
+    public string? MemberCode { get; set; }
 
     public string Name { get; set; } = "";
 
