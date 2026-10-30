@@ -7,7 +7,8 @@ public sealed class ApiInventoryItem
     public string Id { get; set; } = "";
     public string Designation { get; set; } = "";
     public string? InstrumentType { get; set; }
-    public decimal? Price { get; set; }
+    public string? Brand { get; set; }
+    public float? Price { get; set; }
     public string? Condition { get; set; }
     public string? Function { get; set; }
 
@@ -19,7 +20,8 @@ public sealed class ApiInventoryItemRequest
 {
     public string Designation { get; init; } = "";
     public string? InstrumentType { get; init; }
-    public decimal? Price { get; init; }
+    public string? Brand { get; init; }
+    public float? Price { get; init; }
     public string? Condition { get; init; }
     public string? Function { get; init; }
     public string? Notes { get; init; }
