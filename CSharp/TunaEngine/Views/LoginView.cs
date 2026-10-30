@@ -6,6 +6,11 @@ namespace TunaEngine.Views;
 
 public sealed class LoginView : ContentPage
 {
+#if DEBUG
+    private const string OfflineDemoEmail = "demo@local.test";
+    private const string OfflineDemoPassword = "123456";
+#endif
+
     private readonly TunaEngineApiClient _apiClient;
     private readonly Action<ApiLoginResponse> _authenticated;
     private readonly Entry _emailEntry;
@@ -344,6 +349,21 @@ public sealed class LoginView : ContentPage
 
         try
         {
+#if DEBUG
+            if (string.Equals(email, OfflineDemoEmail, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(password, OfflineDemoPassword, StringComparison.Ordinal))
+            {
+                _authenticated(new ApiLoginResponse
+                {
+                    Id = "DEMO-0001",
+                    Name = "Utilizador demo",
+                    Email = OfflineDemoEmail,
+                    RoleId = "DEMO"
+                });
+                return;
+            }
+#endif
+
             var response = await _apiClient.PostAsync<ApiLoginResponse>(
                 "api/members/login",
                 new ApiLoginRequest { Email = email, Password = password });
@@ -361,10 +381,23 @@ public sealed class LoginView : ContentPage
 
             _authenticated(response);
         }
-        catch (Exception exception) when (
-            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        catch (HttpRequestException exception) when (
+            exception.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             ShowError("Email ou palavra-passe inválidos.");
+        }
+        catch (HttpRequestException)
+        {
+            ShowError("Não foi possível contactar o servidor. Verifique a ligação e tente novamente.");
+        }
+        catch (TaskCanceledException)
+        {
+            ShowError("O servidor demorou demasiado tempo a responder. Tente novamente.");
+        }
+        catch (Exception exception) when (
+            exception is JsonException or InvalidOperationException)
+        {
+            ShowError("O servidor devolveu uma resposta inválida. Tente novamente mais tarde.");
         }
         finally
         {

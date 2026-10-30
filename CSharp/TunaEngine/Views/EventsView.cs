@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using TunaEngine.Services;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine.Views;
 
@@ -104,24 +105,21 @@ public sealed class EventsView : ContentView
             return;
         }
 
-        var title = await shell.DisplayPromptAsync(
-            "Novo evento", "Título do evento:", "Continuar", "Cancelar");
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            return;
-        }
-
-        var description = await shell.DisplayPromptAsync(
-            "Descrição", "Detalhes do evento:", "Criar", "Cancelar");
-        if (description is null)
+        var popup = new AddEventPopup();
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage,
+            popup,
+            popup.Completion,
+            popup.Cancel);
+        if (draft is null)
         {
             return;
         }
 
         AppSession.Events.Add(new AgendaEvent
         {
-            Title = title.Trim(),
-            Description = description.Trim(),
+            Title = draft.Title,
+            Description = draft.Description,
             Date = AppSession.SelectedDate
         });
         RefreshAgenda();

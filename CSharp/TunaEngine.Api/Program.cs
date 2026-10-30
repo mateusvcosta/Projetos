@@ -17,7 +17,12 @@ if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
         "MongoDB connection string is missing. Set the MongoDb__ConnectionString environment variable.");
 }
 
-if (string.IsNullOrWhiteSpace(mongoSettings.DatabaseName)
+if (string.IsNullOrWhiteSpace(mongoSettings.InventoryDatabaseName)
+    || string.IsNullOrWhiteSpace(mongoSettings.RolesDatabaseName)
+    || string.IsNullOrWhiteSpace(mongoSettings.DocumentTypesDatabaseName)
+    || string.IsNullOrWhiteSpace(mongoSettings.DocumentsDatabaseName)
+    || string.IsNullOrWhiteSpace(mongoSettings.EventsDatabaseName)
+    || string.IsNullOrWhiteSpace(mongoSettings.MembersDatabaseName)
     || string.IsNullOrWhiteSpace(mongoSettings.InventoryCollectionName)
     || string.IsNullOrWhiteSpace(mongoSettings.RolesCollectionName)
     || string.IsNullOrWhiteSpace(mongoSettings.DocumentTypesCollectionName)
@@ -33,24 +38,22 @@ builder.Services.AddSingleton(mongoSettings);
 builder.Services.AddSingleton<IMongoClient>(
     _ => new MongoClient(mongoSettings.ConnectionString));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
-builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.InventoryDatabaseName)
         .GetCollection<InventoryItem>(mongoSettings.InventoryCollectionName));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.RolesDatabaseName)
         .GetCollection<Roles>(mongoSettings.RolesCollectionName));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DocumentTypesDatabaseName)
         .GetCollection<DocumentType>(mongoSettings.DocumentTypesCollectionName));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DocumentsDatabaseName)
         .GetCollection<Documents>(mongoSettings.DocumentsCollectionName));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.EventsDatabaseName)
         .GetCollection<Events>(mongoSettings.EventsCollectionName));
 builder.Services.AddSingleton(provider =>
-    provider.GetRequiredService<IMongoDatabase>()
+    provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.MembersDatabaseName)
         .GetCollection<Members>(mongoSettings.MembersCollectionName));
 builder.Services.AddScoped<IPasswordHasher<Members>, PasswordHasher<Members>>();
 builder.Services.AddScoped<InventoryInterface, InventoryService>();

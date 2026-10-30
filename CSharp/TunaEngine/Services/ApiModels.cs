@@ -49,8 +49,10 @@ public sealed class ApiMember
     [JsonPropertyName("id_Role")]
     public string? RoleId { get; set; }
 
-    [JsonPropertyName("voice_Type")]
     public string? VoiceType { get; set; }
+
+    [JsonPropertyName("voice_Type")]
+    public string? LegacyVoiceType { get; set; }
 
     public string? Instrument { get; set; }
     public string? Password { get; set; }
@@ -111,4 +113,28 @@ public sealed class ApiDocument
 
     [JsonPropertyName("obs")]
     public string Notes { get; set; } = "";
+}
+
+public sealed class ApiDocumentRequest
+{
+    [JsonPropertyName("id_Documento")]
+    public string DocumentCode { get; init; } = "";
+
+    [JsonPropertyName("tipo_Documento")]
+    public string Type { get; init; } = "";
+
+    [JsonPropertyName("id_Doc_Type")]
+    public string DocumentTypeCode { get; init; } = "";
+
+    [JsonPropertyName("file_Path")]
+    public string? FilePath { get; init; }
+
+    [JsonPropertyName("date_Created")]
+    public DateTime DateCreated { get; init; }
+
+    [JsonPropertyName("added_By")]
+    public string? AddedBy { get; init; }
+
+    [JsonPropertyName("obs")]
+    public string? Notes { get; init; }
 }

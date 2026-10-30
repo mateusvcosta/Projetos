@@ -95,7 +95,8 @@ public sealed class MembersService(
         var update = Builders<Members>.Update
             .Set(member => member.Name, request.Name!.Trim())
             .Set(member => member.Email, request.Email!.Trim())
-            .Set(member => member.Phone, request.Phone?.Trim());
+            .Set(member => member.Phone, request.Phone?.Trim())
+            .Set(member => member.VoiceType, request.VoiceType?.Trim());
 
         if (!string.IsNullOrWhiteSpace(request.Password))
         {
