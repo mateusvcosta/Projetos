@@ -8,6 +8,7 @@ public sealed class InventoryItemRequest
     public string? Condition { get; init; }
     public string? Function { get; init; }
     public string? Notes { get; init; }
+    public string? Brand { get; init; }
 
     public Dictionary<string, string[]> GetValidationErrors()
     {
@@ -21,6 +22,11 @@ public sealed class InventoryItemRequest
         if (Price is < 0)
         {
             errors[nameof(Price)] = ["Price cannot be negative."];
+        }
+
+        if (string.IsNullOrWhiteSpace(Brand))
+        {
+            errors[nameof(Brand)] = ["Brand is required."];
         }
 
         return errors;
@@ -39,6 +45,7 @@ public sealed class InventoryItemRequest
         Price = Price,
         Condition = Condition?.Trim(),
         Function = Function?.Trim(),
-        Notes = Notes?.Trim()
+        Notes = Notes?.Trim(),
+        Brand = Brand?.Trim()
     };
 }

@@ -66,7 +66,8 @@ public sealed class InventoryService(
             .Set(item => item.Price, request.Price)
             .Set(item => item.Condition, request.Condition?.Trim())
             .Set(item => item.Function, request.Function?.Trim())
-            .Set(item => item.Notes, request.Notes?.Trim());
+            .Set(item => item.Notes, request.Notes?.Trim())
+            .Set(item => item.Brand, request.Brand?.Trim());
 
         var result = await inventory.UpdateOneAsync(
             item => item.Id == id,

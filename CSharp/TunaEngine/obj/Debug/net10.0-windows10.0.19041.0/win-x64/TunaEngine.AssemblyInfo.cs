@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TunaEngine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+dee9bb2fc9d585e4fcfb0d05fa04a084114ab341")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+ef5e325bf11c3d325e1c96b5d4a6f16ae9781d1f")]
 [assembly: System.Reflection.AssemblyProductAttribute("TunaEngine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TunaEngine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
