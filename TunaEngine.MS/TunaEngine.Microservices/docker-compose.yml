@@ -1,0 +1,82 @@
+services:
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - tuna-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  auth-api:
+    build:
+      context: ./Auth.Api
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://mongo:27017
+      MongoDb__DatabaseName: tuna_auth
+      Jwt__Secret: ${JWT_SECRET:?Copy .env.example to .env and set JWT_SECRET}
+      Jwt__Issuer: TunaEngine.Auth
+      Jwt__Audience: TunaEngine.Services
+    ports:
+      - "8081:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  events-api:
+    build:
+      context: ./Events.Api
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://mongo:27017
+      MongoDb__DatabaseName: tuna_events
+      Jwt__Secret: ${JWT_SECRET:?Copy .env.example to .env and set JWT_SECRET}
+      Jwt__Issuer: TunaEngine.Auth
+      Jwt__Audience: TunaEngine.Services
+      InventoryApi__BaseUrl: http://inventory-api:8080/
+    ports:
+      - "8082:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      inventory-api:
+        condition: service_started
+
+  inventory-api:
+    build:
+      context: ./Inventory.Api
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://mongo:27017
+      MongoDb__DatabaseName: tuna_inventory
+      Jwt__Secret: ${JWT_SECRET:?Copy .env.example to .env and set JWT_SECRET}
+      Jwt__Issuer: TunaEngine.Auth
+      Jwt__Audience: TunaEngine.Services
+    ports:
+      - "8083:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  members-api:
+    build:
+      context: ./Members.Api
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://mongo:27017
+      MongoDb__DatabaseName: tuna_members
+      Jwt__Secret: ${JWT_SECRET:?Copy .env.example to .env and set JWT_SECRET}
+      Jwt__Issuer: TunaEngine.Auth
+      Jwt__Audience: TunaEngine.Services
+    ports:
+      - "8084:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  tuna-mongo-data:

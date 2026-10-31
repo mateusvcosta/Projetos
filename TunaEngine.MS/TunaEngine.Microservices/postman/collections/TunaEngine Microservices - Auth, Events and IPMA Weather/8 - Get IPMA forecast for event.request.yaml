@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{eventsUrl}}/api/events/{{eventId}}/weather"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('weather forecast is available', function () { pm.response.to.have.status(200); });
+      const body = pm.response.json();
+      pm.test('forecast comes from IPMA for this locality', function () { pm.expect(body.source).to.eql('IPMA'); pm.expect(body.globalIdLocal).to.eql(Number(pm.collectionVariables.get('globalIdLocal'))); });
+      pm.test('forecast matches event date', function () { pm.expect(body.forecast.forecastDate).to.eql(pm.collectionVariables.get('eventDateOnly')); });
+    language: text/javascript
+order: 8000

@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{inventoryUrl}}/api/inventory"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+      "designation": "Guitarra de demonstração",
+      "instrumentType": "Cordas",
+      "price": 250,
+      "condition": "Bom estado",
+      "function": "Ensaios",
+      "brand": "Demo",
+      "notes": "Item de teste Postman"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('inventory item created', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('inventoryId', body.id);
+      pm.test('inventory code generated', function () { pm.expect(body.inventoryCode).to.match(/^INV-\d+$/); });
+    language: text/javascript
+order: 4000

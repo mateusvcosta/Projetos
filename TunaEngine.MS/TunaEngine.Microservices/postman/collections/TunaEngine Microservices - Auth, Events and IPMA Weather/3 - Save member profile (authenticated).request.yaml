@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{membersUrl}}/api/members/me"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+      "tunaName": "Tuna de Demonstração",
+      "phone": "+351 912 345 678",
+      "studentNumber": "27951",
+      "voiceType": "Tenor",
+      "instrument": "Guitarra"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('member profile saved', function () { pm.response.to.have.status(200); });
+      pm.test('profile belongs to signed-in member', function () { pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get('email')); });
+    language: text/javascript
+order: 3000

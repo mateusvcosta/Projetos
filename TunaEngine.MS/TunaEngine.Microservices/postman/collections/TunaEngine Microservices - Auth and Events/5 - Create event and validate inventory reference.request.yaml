@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{eventsUrl}}/api/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+      "id_Event": "EVT-DEMO-01",
+      "date_Hour": "2026-11-02T19:00:00Z",
+      "name": "Ensaio de demonstração",
+      "location": "Sala da Tuna",
+      "participants": [],
+      "instruments_Needed": [
+        {
+          "id_Inventory": "{{inventoryId}}",
+          "designation": "Guitarra de demonstração",
+          "quantity": 1
+        }
+      ],
+      "boleias": []
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('event created', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('eventId', body.id);
+      pm.test('event id returned', function () { pm.expect(body.id).to.be.a('string').and.not.empty; });
+    language: text/javascript
+order: 5000

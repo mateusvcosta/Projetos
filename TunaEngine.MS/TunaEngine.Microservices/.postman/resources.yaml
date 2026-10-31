@@ -1,0 +1,16 @@
+# Use this workspace to collaborate
+workspace:
+  id: e08b232b-8c95-416e-861a-d1798646830d
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/TunaEngine Microservices - Auth and Events: 01f8fa5a-b343-4f7d-966b-fd00566049c8
+    ../postman/collections/TunaEngine Microservices - Auth, Events and IPMA Weather: 4fe8a4eb-df3d-496e-a6c2-35b542f2663d
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{authUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{email}}",
+      "password": "{{password}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('login succeeds', function () { pm.response.to.have.status(200); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('token', body.accessToken);
+      pm.test('token is returned', function () { pm.expect(body.accessToken).to.be.a('string').and.not.empty; });
+    language: text/javascript
+order: 2000

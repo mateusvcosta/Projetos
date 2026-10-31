@@ -1,0 +1,200 @@
+{
+  "info": {
+    "_postman_id": "a1252fb8-b77e-4ddf-a37f-80481fbf4e83",
+    "name": "TunaEngine Microservices - Auth, Events and IPMA Weather",
+    "description": "End-to-end flow: register, login, create an event, retrieve its IPMA forecast, and set attendance.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "authUrl", "value": "http://localhost:8081" },
+    { "key": "eventsUrl", "value": "http://localhost:8082" },
+    { "key": "inventoryUrl", "value": "http://localhost:8083" },
+    { "key": "membersUrl", "value": "http://localhost:8084" },
+    { "key": "email", "value": "" },
+    { "key": "password", "value": "TunaDemo123!" },
+    { "key": "token", "value": "" },
+    { "key": "eventId", "value": "" },
+    { "key": "eventDate", "value": "" },
+    { "key": "eventDateOnly", "value": "" },
+    { "key": "globalIdLocal", "value": "1060300" },
+    { "key": "inventoryId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Register member",
+      "event": [{
+        "listen": "prerequest",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.collectionVariables.set('email', 'demo+' + pm.variables.replaceIn('{{$guid}}') + '@example.test');"
+        ] }
+      }, {
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('member registered', function () { pm.response.to.have.status(201); });",
+          "const body = pm.response.json();",
+          "pm.test('response contains no password fields', function () { pm.expect(body).not.to.have.property('passwordHash'); pm.expect(body).not.to.have.property('password'); });"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Demo Member\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{authUrl}}/api/auth/register"
+      }
+    },
+    {
+      "name": "2 - Login and save token",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('login succeeds', function () { pm.response.to.have.status(200); });",
+          "const body = pm.response.json();",
+          "pm.collectionVariables.set('token', body.accessToken);",
+          "pm.test('token is returned', function () { pm.expect(body.accessToken).to.be.a('string').and.not.empty; });"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{authUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "3 - Save member profile (authenticated)",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('member profile saved', function () { pm.response.to.have.status(200); });",
+          "pm.test('profile belongs to signed-in member', function () { pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get('email')); });"
+        ] }
+      }],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"tunaName\": \"Tuna de Demonstração\",\n  \"phone\": \"+351 912 345 678\",\n  \"studentNumber\": \"27951\",\n  \"voiceType\": \"Tenor\",\n  \"instrument\": \"Guitarra\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{membersUrl}}/api/members/me"
+      }
+    },
+    {
+      "name": "4 - Create inventory item (authenticated)",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('inventory item created', function () { pm.response.to.have.status(201); });",
+          "const body = pm.response.json();",
+          "pm.collectionVariables.set('inventoryId', body.id);",
+          "pm.test('inventory code generated', function () { pm.expect(body.inventoryCode).to.match(/^INV-\\d+$/); });"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"designation\": \"Guitarra de demonstração\",\n  \"instrumentType\": \"Cordas\",\n  \"price\": 250,\n  \"condition\": \"Bom estado\",\n  \"function\": \"Ensaios\",\n  \"brand\": \"Demo\",\n  \"notes\": \"Item de teste Postman\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{inventoryUrl}}/api/inventory"
+      }
+    },
+    {
+      "name": "5 - Create event and validate inventory reference",
+      "event": [{
+        "listen": "prerequest",
+        "script": { "type": "text/javascript", "exec": [
+          "const eventDate = new Date();",
+          "eventDate.setUTCDate(eventDate.getUTCDate() + 1);",
+          "eventDate.setUTCHours(12, 0, 0, 0);",
+          "pm.collectionVariables.set('eventDate', eventDate.toISOString());",
+          "pm.collectionVariables.set('eventDateOnly', eventDate.toISOString().slice(0, 10));"
+        ] }
+      }, {
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('event created', function () { pm.response.to.have.status(201); });",
+          "const body = pm.response.json();",
+          "pm.collectionVariables.set('eventId', body.id);",
+          "pm.test('event id returned', function () { pm.expect(body.id).to.be.a('string').and.not.empty; });"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"id_Event\": \"EVT-DEMO-01\",\n  \"date_Hour\": \"{{eventDate}}\",\n  \"name\": \"Ensaio de demonstração\",\n  \"location\": \"Coimbra, Portugal\",\n  \"globalIdLocal\": {{globalIdLocal}},\n  \"participants\": [],\n  \"instruments_Needed\": [\n    {\n      \"id_Inventory\": \"{{inventoryId}}\",\n      \"designation\": \"Guitarra de demonstração\",\n      \"quantity\": 1\n    }\n  ],\n  \"boleias\": []\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{eventsUrl}}/api/events"
+      }
+    },
+    {
+      "name": "6 - Confirm attendance (authenticated)",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('attendance recorded', function () { pm.response.to.have.status(200); });",
+          "const body = pm.response.json();",
+          "pm.test('participant is present', function () { pm.expect(body.participants).to.have.lengthOf(1); pm.expect(body.participants[0].attendance_Status).to.eql('going'); });"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"going\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{eventsUrl}}/api/events/{{eventId}}/attendance"
+      }
+    },
+    {
+      "name": "7 - Retrieve event (authenticated)",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('event retrieved', function () { pm.response.to.have.status(200); });",
+          "const body = pm.response.json();",
+          "pm.test('attendance persists', function () { pm.expect(body.participants[0].attendance_Status).to.eql('going'); });"
+        ] }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{eventsUrl}}/api/events/{{eventId}}"
+      }
+    },
+    {
+      "name": "8 - Get IPMA forecast for event",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('weather forecast is available', function () { pm.response.to.have.status(200); });",
+          "const body = pm.response.json();",
+          "pm.test('forecast comes from IPMA for this locality', function () { pm.expect(body.source).to.eql('IPMA'); pm.expect(body.globalIdLocal).to.eql(Number(pm.collectionVariables.get('globalIdLocal'))); });",
+          "pm.test('forecast matches event date', function () { pm.expect(body.forecast.forecastDate).to.eql(pm.collectionVariables.get('eventDateOnly')); });"
+        ] }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{eventsUrl}}/api/events/{{eventId}}/weather"
+      }
+    },
+    {
+      "name": "9 - Reject request without token",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('unauthenticated request rejected', function () { pm.response.to.have.status(401); });"
+        ] }
+      }],
+      "request": {
+        "method": "GET",
+        "url": "{{eventsUrl}}/api/events"
+      }
+    }
+  ]
+}

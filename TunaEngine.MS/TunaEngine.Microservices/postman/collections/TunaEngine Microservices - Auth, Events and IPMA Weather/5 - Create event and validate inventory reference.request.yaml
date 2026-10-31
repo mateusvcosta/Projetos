@@ -1,0 +1,42 @@
+$kind: http-request
+url: "{{eventsUrl}}/api/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+      "id_Event": "EVT-DEMO-01",
+      "date_Hour": "{{eventDate}}",
+      "name": "Ensaio de demonstração",
+      "location": "Coimbra, Portugal",
+      "globalIdLocal": {{globalIdLocal}},
+      "participants": [],
+      "instruments_Needed": [
+        {
+          "id_Inventory": "{{inventoryId}}",
+          "designation": "Guitarra de demonstração",
+          "quantity": 1
+        }
+      ],
+      "boleias": []
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      const eventDate = new Date();
+      eventDate.setUTCDate(eventDate.getUTCDate() + 1);
+      eventDate.setUTCHours(12, 0, 0, 0);
+      pm.collectionVariables.set('eventDate', eventDate.toISOString());
+      pm.collectionVariables.set('eventDateOnly', eventDate.toISOString().slice(0, 10));
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('event created', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.collectionVariables.set('eventId', body.id);
+      pm.test('event id returned', function () { pm.expect(body.id).to.be.a('string').and.not.empty; });
+    language: text/javascript
+order: 5000

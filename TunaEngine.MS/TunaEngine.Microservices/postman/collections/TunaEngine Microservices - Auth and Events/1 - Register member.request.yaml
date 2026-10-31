@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{authUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Demo Member",
+      "email": "{{email}}",
+      "password": "{{password}}"
+    }
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set('email', 'demo+' + pm.variables.replaceIn('{{$guid}}') + '@example.test');
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('member registered', function () { pm.response.to.have.status(201); });
+      const body = pm.response.json();
+      pm.test('response contains no password fields', function () { pm.expect(body).not.to.have.property('passwordHash'); pm.expect(body).not.to.have.property('password'); });
+    language: text/javascript
+order: 1000

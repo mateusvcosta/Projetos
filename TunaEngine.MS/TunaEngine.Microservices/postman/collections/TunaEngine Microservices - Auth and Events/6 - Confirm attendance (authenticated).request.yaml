@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{eventsUrl}}/api/events/{{eventId}}/attendance"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+      "status": "going"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('attendance recorded', function () { pm.response.to.have.status(200); });
+      const body = pm.response.json();
+      pm.test('participant is present', function () { pm.expect(body.participants).to.have.lengthOf(1); pm.expect(body.participants[0].attendance_Status).to.eql('going'); });
+    language: text/javascript
+order: 6000

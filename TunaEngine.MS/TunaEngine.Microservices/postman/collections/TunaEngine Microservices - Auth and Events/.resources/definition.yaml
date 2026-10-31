@@ -1,0 +1,12 @@
+$kind: collection
+description: "End-to-end local flow: register, login, create an event, set attendance, and retrieve it."
+variables:
+  authUrl: http://localhost:8081
+  eventsUrl: http://localhost:8082
+  inventoryUrl: http://localhost:8083
+  membersUrl: http://localhost:8084
+  email: ""
+  password: TunaDemo123!
+  token: ""
+  eventId: ""
+  inventoryId: ""

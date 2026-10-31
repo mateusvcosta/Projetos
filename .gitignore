@@ -1,5 +1,65 @@
-/C#/DesktopApp.Maui/bin/
-/C#/DesktopApp.Maui/obj/
-/C#/TunaEngine.Api/bin/
-/C#/TunaEngine.Api/obj/
-/CSharp/TunaEngine.Api/obj
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Aa]rtifacts/
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.sln.ide
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# .NET and MAUI generated/local files
+*.cache
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+project.lock.json
+project.fragment.lock.json
+**/Properties/launchSettings.json
+**/Properties/PublishProfiles/*.pubxml
+**/Properties/PublishProfiles/*.publishsettings
+
+# MAUI / mobile signing and local provisioning
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.provisionprofile
+
+# Local environment and secrets (keep example templates tracked)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+secrets.*
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json

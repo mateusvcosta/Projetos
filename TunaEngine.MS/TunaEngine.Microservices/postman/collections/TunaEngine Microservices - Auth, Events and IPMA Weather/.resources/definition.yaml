@@ -1,0 +1,15 @@
+$kind: collection
+description: "End-to-end flow: register, login, create an event, retrieve its IPMA forecast, and set attendance."
+variables:
+  authUrl: http://localhost:8081
+  eventsUrl: http://localhost:8082
+  inventoryUrl: http://localhost:8083
+  membersUrl: http://localhost:8084
+  email: ""
+  password: TunaDemo123!
+  token: ""
+  eventId: ""
+  eventDate: ""
+  eventDateOnly: ""
+  globalIdLocal: "1060300"
+  inventoryId: ""

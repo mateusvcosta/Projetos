@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{eventsUrl}}/api/events/{{eventId}}"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('event retrieved', function () { pm.response.to.have.status(200); });
+      const body = pm.response.json();
+      pm.test('attendance persists', function () { pm.expect(body.participants[0].attendance_Status).to.eql('going'); });
+    language: text/javascript
+order: 7000

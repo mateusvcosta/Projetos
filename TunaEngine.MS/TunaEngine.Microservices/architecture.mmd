@@ -1,0 +1,23 @@
+flowchart LR
+    Client[MAUI app or Postman]
+    Auth[Auth API\nport 8081]
+    Members[Members API\nport 8084]
+    Events[Events API\nport 8082]
+    Inventory[Inventory API\nport 8083]
+    IPMA[IPMA Open Data\nweather forecast]
+    AuthDB[(MongoDB\ntuna_auth)]
+    MembersDB[(MongoDB\ntuna_members)]
+    EventsDB[(MongoDB\ntuna_events)]
+    InventoryDB[(MongoDB\ntuna_inventory)]
+
+    Client -->|register and login| Auth
+    Auth -->|signed JWT| Client
+    Client -->|Bearer JWT and profile requests| Members
+    Client -->|Bearer JWT and inventory requests| Inventory
+    Client -->|Bearer JWT and event requests| Events
+    Auth --> AuthDB
+    Members --> MembersDB
+    Events --> EventsDB
+    Inventory --> InventoryDB
+    Events -->|validate referenced items over REST| Inventory
+    Events -->|daily forecast by GlobalIdLocal| IPMA
