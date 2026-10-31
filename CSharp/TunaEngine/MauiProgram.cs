@@ -13,7 +13,21 @@ public static class MauiProgram
 			"SearchEntryBorderless",
 			(handler, view) =>
 			{
-				if (view is Entry { AutomationId: "SearchEntry" })
+				if (view is Entry { AutomationId: "SearchEntry" or "LoginEntry" })
+				{
+					handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+					handler.PlatformView.Background = null;
+				}
+			});
+
+		Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping(
+			"LoginButtonBorderless",
+			(handler, view) =>
+			{
+				if (view is Button
+					{
+						AutomationId: "LoginShowPasswordButton" or "LoginForgotPasswordButton"
+					})
 				{
 					handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
 					handler.PlatformView.Background = null;

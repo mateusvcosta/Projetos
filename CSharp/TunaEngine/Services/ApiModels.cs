@@ -7,7 +7,8 @@ public sealed class ApiInventoryItem
     public string Id { get; set; } = "";
     public string Designation { get; set; } = "";
     public string? InstrumentType { get; set; }
-    public decimal? Price { get; set; }
+    public string? Brand { get; set; }
+    public float? Price { get; set; }
     public string? Condition { get; set; }
     public string? Function { get; set; }
 
@@ -19,7 +20,8 @@ public sealed class ApiInventoryItemRequest
 {
     public string Designation { get; init; } = "";
     public string? InstrumentType { get; init; }
-    public decimal? Price { get; init; }
+    public string? Brand { get; init; }
+    public float? Price { get; init; }
     public string? Condition { get; init; }
     public string? Function { get; init; }
     public string? Notes { get; init; }
@@ -47,8 +49,10 @@ public sealed class ApiMember
     [JsonPropertyName("id_Role")]
     public string? RoleId { get; set; }
 
-    [JsonPropertyName("voice_Type")]
     public string? VoiceType { get; set; }
+
+    [JsonPropertyName("voice_Type")]
+    public string? LegacyVoiceType { get; set; }
 
     public string? Instrument { get; set; }
     public string? Password { get; set; }
@@ -109,4 +113,28 @@ public sealed class ApiDocument
 
     [JsonPropertyName("obs")]
     public string Notes { get; set; } = "";
+}
+
+public sealed class ApiDocumentRequest
+{
+    [JsonPropertyName("id_Documento")]
+    public string DocumentCode { get; init; } = "";
+
+    [JsonPropertyName("tipo_Documento")]
+    public string Type { get; init; } = "";
+
+    [JsonPropertyName("id_Doc_Type")]
+    public string DocumentTypeCode { get; init; } = "";
+
+    [JsonPropertyName("file_Path")]
+    public string? FilePath { get; init; }
+
+    [JsonPropertyName("date_Created")]
+    public DateTime DateCreated { get; init; }
+
+    [JsonPropertyName("added_By")]
+    public string? AddedBy { get; init; }
+
+    [JsonPropertyName("obs")]
+    public string? Notes { get; init; }
 }

@@ -11,7 +11,7 @@ $env:MongoDb__ConnectionString = "mongodb://localhost:27017"
 dotnet run --project .\TunaEngine.Api.csproj
 ```
 
-For MongoDB Atlas, set `MongoDb__ConnectionString` to the connection string supplied by Atlas. `MongoDb:DatabaseName` and `MongoDb:InventoryCollectionName` default to `TunaEngine` and `inventory`; override them with `MongoDb__DatabaseName` and `MongoDb__InventoryCollectionName`.
+For MongoDB Atlas, set `MongoDb__ConnectionString` to the connection string supplied by Atlas. Each service uses a database whose name matches its collection: `Inventory`, `Documents`, `Events`, `Doc_Type`, and `Members`. The `Roles` collection is also stored in the `Members` database. Override database names with the corresponding `MongoDb__*DatabaseName` environment variables if needed.
 
 The singleton `MongoClient` is reused for the lifetime of the API. Pool and timeout options intentionally use the MongoDB driver's defaults until deployment topology and workload concurrency are known. Example requests are in `TunaEngine.Api.http`.
 

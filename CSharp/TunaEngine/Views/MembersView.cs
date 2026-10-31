@@ -134,7 +134,7 @@ public sealed class MembersView : ContentView
                 Email = member.Email ?? "",
                 Phone = member.Phone ?? "",
                 StudentNumber = member.StudentNumber ?? "",
-                VoiceType = member.VoiceType ?? "",
+                VoiceType = member.VoiceType ?? member.LegacyVoiceType ?? "",
                 Instrument = member.Instrument ?? "",
                 Password = member.Password ?? ""
             }));
@@ -192,9 +192,10 @@ public sealed class MembersView : ContentView
         {
             ViewTheme.TextLabel("Nome", 12, true, ViewTheme.Muted),
             ViewTheme.TextLabel("Cargo", 12, true, ViewTheme.Muted),
+            ViewTheme.TextLabel("Naipe", 12, true, ViewTheme.Muted),
             ViewTheme.TextLabel("Ações", 12, true, ViewTheme.Muted)
         };
-        cells[2].HorizontalTextAlignment = TextAlignment.End;
+        cells[3].HorizontalTextAlignment = TextAlignment.End;
 
         for (var column = 0; column < cells.Length; column++)
         {
@@ -235,6 +236,16 @@ public sealed class MembersView : ContentView
         roleCell.Add(ViewTheme.TextLabel(member.Role, 14, color: Color.FromArgb("#CCCCDD")));
         row.Add(roleCell, 1, 0);
 
+        var voiceTypeCell = new Grid
+        {
+            Padding = new Thickness(0)
+        };
+        voiceTypeCell.Add(ViewTheme.TextLabel(
+            string.IsNullOrWhiteSpace(member.VoiceType) ? "—" : member.VoiceType,
+            14,
+            color: Color.FromArgb("#CCCCDD")));
+        row.Add(voiceTypeCell, 2, 0);
+
         var actionCell = new Grid
         {
             Padding = new Thickness(0)
@@ -255,7 +266,7 @@ public sealed class MembersView : ContentView
         SemanticProperties.SetDescription(actionButton, $"Ações para {member.Name}");
         ViewTheme.BindAction(actionButton, () => MemberActions(member));
         actionCell.Add(actionButton);
-        row.Add(actionCell, 2, 0);
+        row.Add(actionCell, 3, 0);
 
         AddBottomBorder(row);
         return row;
@@ -271,8 +282,9 @@ public sealed class MembersView : ContentView
             BackgroundColor = background ?? Colors.Transparent,
             ColumnDefinitions =
             {
-                new ColumnDefinition(new GridLength(700, GridUnitType.Star)),
-                new ColumnDefinition(new GridLength(300, GridUnitType.Star)),
+                new ColumnDefinition(new GridLength(500, GridUnitType.Star)),
+                new ColumnDefinition(new GridLength(200, GridUnitType.Star)),
+                new ColumnDefinition(new GridLength(200, GridUnitType.Star)),
                 new ColumnDefinition(new GridLength(100, GridUnitType.Star))
             }
         };

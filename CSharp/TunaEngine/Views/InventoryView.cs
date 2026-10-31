@@ -128,6 +128,7 @@ public sealed class InventoryView : ContentView
                 {
                     Id = item.Id,
                     Name = item.Designation,
+                    Brand = item.Brand,
                     UnitCost = item.Price,
                     Condition = item.Condition,
                     Function = item.Function,
@@ -152,9 +153,14 @@ public sealed class InventoryView : ContentView
     {
         var columns = new[]
         {
-            new GridLength(480, GridUnitType.Star),
-            new GridLength(140, GridUnitType.Star),
-            new GridLength(120, GridUnitType.Star)
+            new GridLength(160),
+            new GridLength(140),
+            new GridLength(120),
+            new GridLength(140),
+            new GridLength(160),
+            new GridLength(240),
+            new GridLength(90),
+            new GridLength(90)
         };
 
         Grid CreateRow(params View[] cells)
@@ -212,7 +218,11 @@ public sealed class InventoryView : ContentView
 
         var headings = CreateRow(
             ViewTheme.TextLabel("Item", 12, true, ViewTheme.Muted),
-            AlignedLabel("Custo/Un.", TextAlignment.End),
+            AlignedLabel("Marca", TextAlignment.Start),
+            AlignedLabel("Custo/Un.", TextAlignment.Start),
+            AlignedLabel("Estado", TextAlignment.Start),
+            AlignedLabel("Função", TextAlignment.Start),
+            AlignedLabel("Observações", TextAlignment.Start),
             CenteredLabel("Editar", ViewTheme.Muted, 12, true),
             CenteredLabel("Remover", ViewTheme.Muted, 12, true));
         headings.HeightRequest = 44;
@@ -266,7 +276,11 @@ public sealed class InventoryView : ContentView
                 () => RemoveItem(table, capturedItem));
             var row = CreateRow(
                 itemCell,
-                AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.End, ViewTheme.Muted, 14),
+                AlignedLabel(ValueOrDash(item.Brand), TextAlignment.Start, ViewTheme.Muted, 12, false),
+                AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.Start, ViewTheme.Muted, 14),
+                AlignedLabel(ValueOrDash(item.Condition), TextAlignment.Start, ViewTheme.Muted, 12, false),
+                AlignedLabel(ValueOrDash(item.Function), TextAlignment.Start, ViewTheme.Muted, 12, false),
+                AlignedLabel(ValueOrDash(item.Notes), TextAlignment.Start, ViewTheme.Muted, 12, false),
                 editButton,
                 removeButton);
             row.HeightRequest = 64;
@@ -281,17 +295,27 @@ public sealed class InventoryView : ContentView
             panel.Children.Add(row);
         }
 
-        return new Border
+        var tableBorder = new Border
         {
             BackgroundColor = ViewTheme.Surface,
             Stroke = ViewTheme.Stroke,
             StrokeThickness = 1,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
             Padding = 0,
-            HorizontalOptions = LayoutOptions.Fill,
+            WidthRequest = columns.Sum(column => column.Value) + 40,
             Content = panel
         };
+
+        return new ScrollView
+        {
+            Orientation = ScrollOrientation.Horizontal,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Always,
+            Content = tableBorder
+        };
     }
+
+    private static string ValueOrDash(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
 
     private static Label CenteredLabel(
         string text,
@@ -375,8 +399,13 @@ public sealed class InventoryView : ContentView
             return;
         }
 
-        var name = await shell.DisplayPromptAsync("Nova tabela", "Nome da tabela:", "Criar", "Cancelar");
-        if (string.IsNullOrWhiteSpace(name))
+        var popup = new AddInventoryTablePopup();
+        var name = await ModalOverlay.ShowAsync(
+            shell.CurrentPage,
+            popup,
+            popup.Completion,
+            popup.Cancel);
+        if (name is null)
         {
             return;
         }
@@ -413,6 +442,7 @@ public sealed class InventoryView : ContentView
 
         var popup = new AddInventoryItemPopup(
             item?.Name,
+            item?.Brand,
             item?.UnitCost,
             item?.Condition,
             item?.Function,
@@ -434,6 +464,7 @@ public sealed class InventoryView : ContentView
             {
                 Designation = draft.Name,
                 InstrumentType = table.Name,
+                Brand = draft.Brand,
                 Price = draft.UnitCost,
                 Condition = draft.Condition,
                 Function = draft.Function,
@@ -466,6 +497,7 @@ public sealed class InventoryView : ContentView
             item.Id = savedItem.Id;
         }
         item.Name = draft.Name;
+        item.Brand = draft.Brand;
         item.UnitCost = draft.UnitCost;
         item.Condition = draft.Condition;
         item.Function = draft.Function;

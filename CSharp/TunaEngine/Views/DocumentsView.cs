@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using TunaEngine.Services;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine.Views;
 
@@ -25,6 +26,7 @@ public sealed class DocumentsView : ContentView
             "Documentos guardados na base de dados.",
             14,
             color: ViewTheme.Muted));
+        content.Children.Add(ViewTheme.Action("+ Novo documento", AddDocument));
         content.Children.Add(_status);
         content.Children.Add(_retryButton);
         content.Children.Add(_documents);
@@ -83,6 +85,46 @@ public sealed class DocumentsView : ContentView
             _status.Text = $"Não foi possível carregar os documentos: {exception.Message}";
             _status.TextColor = ViewTheme.Error;
             _retryButton.IsVisible = true;
+        }
+    }
+
+    private async Task AddDocument()
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var popup = new AddDocumentPopup();
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
+        if (draft is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _apiClient.PostAsync<ApiDocument>(
+                "api/documents",
+                new ApiDocumentRequest
+                {
+                    DocumentCode = $"DOC-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
+                    Type = draft.Type,
+                    DocumentTypeCode = draft.TypeCode,
+                    FilePath = draft.FilePath,
+                    DateCreated = DateTime.UtcNow,
+                    AddedBy = AppSession.ProfileMemberId,
+                    Notes = draft.Notes
+                });
+            await LoadDocumentsAsync();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível guardar o documento: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
         }
     }
 }

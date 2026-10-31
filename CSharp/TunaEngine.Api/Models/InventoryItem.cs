@@ -30,6 +30,9 @@ public sealed class InventoryItem
     [BsonElement("Function")]
     public string? Function { get; set; }
 
+    [BsonElement("Brand")]
+    public string? Brand { get; set; }
+
     [BsonElement("Obs")]
     public string? Notes { get; set; }
 }

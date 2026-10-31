@@ -39,6 +39,7 @@ public sealed class Members
     public string? RoleId { get; set; }
 
     [BsonElement("Voice_Type")]
+    [JsonPropertyName("voice_Type")]
     public string? VoiceType { get; set; }
 
     [BsonElement("Instrument")]

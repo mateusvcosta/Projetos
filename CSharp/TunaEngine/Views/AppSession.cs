@@ -6,7 +6,8 @@ internal sealed class StockItem
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public decimal? UnitCost { get; set; }
+    public string? Brand { get; set; }
+    public float? UnitCost { get; set; }
     public string? Condition { get; set; }
     public string? Function { get; set; }
     public string? Notes { get; set; }
@@ -68,7 +69,7 @@ internal static class AppSession
     public static string ProfileVoiceType { get; set; } = "";
     public static string ProfileInstrument { get; set; } = "";
 
-    public static string Money(decimal? value) =>
+    public static string Money(float? value) =>
         value.HasValue ? value.Value.ToString("C", Portuguese) : "—";
 
     public static string FormatShortDate(DateTime date) =>

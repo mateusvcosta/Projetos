@@ -11,6 +11,7 @@ public sealed class AddInventoryItemPopup : ContentView
     private readonly Label _titleLabel;
     private readonly Label _descriptionLabel;
     private readonly Entry _nameEntry;
+    private readonly Entry _brandEntry;
     private readonly Entry _unitCostEntry;
     private readonly Entry _conditionEntry;
     private readonly Entry _functionEntry;
@@ -22,7 +23,8 @@ public sealed class AddInventoryItemPopup : ContentView
 
     public AddInventoryItemPopup(
         string? name = null,
-        decimal? unitCost = null,
+        string? brand = null,
+        float? unitCost = null,
         string? condition = null,
         string? function = null,
         string? notes = null)
@@ -44,6 +46,7 @@ public sealed class AddInventoryItemPopup : ContentView
             TextColor = ViewTheme.Muted
         };
         _nameEntry = CreateEntry("Nome do item", maxLength: 80);
+        _brandEntry = CreateEntry("Marca, opcional", maxLength: 80);
         _unitCostEntry = CreateEntry("Custo unitário (€), opcional", maxLength: 12);
         _conditionEntry = CreateEntry("Estado, opcional", maxLength: 100);
         _functionEntry = CreateEntry("Função, opcional", maxLength: 100);
@@ -65,7 +68,7 @@ public sealed class AddInventoryItemPopup : ContentView
             Spacing = 10,
             Children =
             {
-                _nameEntry, _unitCostEntry,
+                _nameEntry, _brandEntry, _unitCostEntry,
                 _conditionEntry, _functionEntry, _notesEntry, _errorLabel
             }
         };
@@ -116,6 +119,7 @@ public sealed class AddInventoryItemPopup : ContentView
         _titleLabel.Text = "Editar item";
         _descriptionLabel.Text = "Atualize os dados do item.";
         _nameEntry.Text = name;
+        _brandEntry.Text = brand;
         _unitCostEntry.Text = unitCost?.ToString("0.00", CultureInfo.GetCultureInfo("pt-PT"));
         _conditionEntry.Text = condition;
         _functionEntry.Text = function;
@@ -161,6 +165,7 @@ public sealed class AddInventoryItemPopup : ContentView
 
         _completion.TrySetResult(new InventoryItemDraft(
             name,
+            _brandEntry.Text?.Trim(),
             unitCost,
             _conditionEntry.Text?.Trim(),
             _functionEntry.Text?.Trim(),
@@ -170,7 +175,7 @@ public sealed class AddInventoryItemPopup : ContentView
     public void Cancel() =>
         MainThread.BeginInvokeOnMainThread(() => _completion.TrySetResult(null));
 
-    private static bool TryParseUnitCost(string? value, out decimal? unitCost)
+    private static bool TryParseUnitCost(string? value, out float? unitCost)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -179,7 +184,7 @@ public sealed class AddInventoryItemPopup : ContentView
         }
 
         var normalizedValue = value?.Trim().Replace(',', '.');
-        if (decimal.TryParse(
+        if (float.TryParse(
             normalizedValue,
             NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
             CultureInfo.InvariantCulture,
@@ -197,7 +202,8 @@ public sealed class AddInventoryItemPopup : ContentView
 
 public sealed record InventoryItemDraft(
     string Name,
-    decimal? UnitCost,
+    string? Brand,
+    float? UnitCost,
     string? Condition,
     string? Function,
     string? Notes);
