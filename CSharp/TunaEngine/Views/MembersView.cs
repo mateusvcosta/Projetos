@@ -11,6 +11,7 @@ public sealed class MembersView : ContentView
     private readonly Label _status = ViewTheme.TextLabel("A carregar membros...", 13, color: ViewTheme.Muted);
     private readonly Button _retryButton;
     private readonly List<string> _roleNames = [];
+    private readonly List<ApiRole> _roles = [];
     private readonly VerticalStackLayout _table = new()
     {
         Spacing = 0,
@@ -369,6 +370,8 @@ public sealed class MembersView : ContentView
             try
             {
                 var roles = await _apiClient.GetAsync<List<ApiRole>>("api/roles");
+                _roles.Clear();
+                _roles.AddRange(roles);
                 _roleNames.AddRange(roles
                     .Select(role => role.Name)
                     .Where(name => !string.IsNullOrWhiteSpace(name))
@@ -404,9 +407,52 @@ public sealed class MembersView : ContentView
         member.VoiceType = draft.VoiceType;
         member.Instrument = draft.Instrument;
         member.Password = draft.Password;
-        if (!AppSession.Members.Contains(member))
+
+        var role = _roles.FirstOrDefault(candidate =>
+            string.Equals(candidate.Name, draft.Role, StringComparison.CurrentCultureIgnoreCase)
+            || string.Equals(candidate.Id, draft.Role, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(candidate.RoleCode, draft.Role, StringComparison.OrdinalIgnoreCase));
+
+        var request = new
         {
-            AppSession.Members.Add(member);
+            name = member.Name,
+            tunaName = member.TunaName,
+            email = member.Email,
+            password = member.Password,
+            phone = member.Phone,
+            studentNumber = member.StudentNumber,
+            roleId = role?.Id ?? member.Role,
+            voiceType = member.VoiceType,
+            instrument = member.Instrument
+        };
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(member.Id))
+            {
+                var created = await _apiClient.PostAsync<ApiMember>(
+                    "api/members", request);
+                member.Id = created.Id;
+            }
+            else
+            {
+                await _apiClient.PutAsync($"api/members/{member.Id}", request);
+            }
+
+            if (!AppSession.Members.Contains(member))
+            {
+                AppSession.Members.Add(member);
+            }
+
+            _status.Text = "";
+            _status.TextColor = ViewTheme.Muted;
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            _status.Text = $"Não foi possível guardar o membro: {exception.Message}";
+            _status.TextColor = ViewTheme.Error;
+            return;
         }
 
         Render();
