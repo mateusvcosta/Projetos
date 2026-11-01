@@ -637,7 +637,6 @@ C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccat
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauiimage.inputs
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauifont.inputs
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauisplash.inputs
-C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauisplash.stamp
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\r\events@3x.png
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\r\events@2x.png
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\r\events.png
@@ -720,7 +719,6 @@ C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccat
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauiimage.stamp
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauiimage.outputs
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\f\MauiInfo.plist
-C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauifont.stamp
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\f\OpenSans-Regular.ttf
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resizetizer\f\OpenSans-Semibold.ttf
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\actool\_PartialAppManifest.items
@@ -746,3 +744,13 @@ C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccat
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\TunaEngine.pdb
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\TunaEngine.genruntimeconfig.cache
 C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\ref\TunaEngine.dll
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\bin\Debug\net10.0-maccatalyst\maccatalyst-x64\libextension-dotnet.a
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\bin\Debug\net10.0-maccatalyst\maccatalyst-x64\Microsoft.Maui.resources.zip
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedAtlasTextures.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedImageAssets.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedInterfaceDefinitions.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedColladaAssets.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedCoreMLModels.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\resourcestamps\_UnpackedSceneKitAssets.items
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauisplash.outputs
+C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine\obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mauifont.outputs

@@ -209,6 +209,43 @@ internal static class ViewTheme
         };
     }
 
+    public static void BindAction(ImageButton button, Func<Task> callback)
+    {
+        var isProcessing = false;
+
+        button.Clicked += async (_, _) =>
+        {
+            if (isProcessing)
+            {
+                return;
+            }
+
+            isProcessing = true;
+            button.IsEnabled = false;
+
+            try
+            {
+                await callback();
+            }
+            catch (Exception exception)
+            {
+                var shell = Shell.Current;
+                if (shell is not null)
+                {
+                    await shell.DisplayAlertAsync(
+                        "Erro",
+                        $"Não foi possível concluir a operação: {exception.Message}",
+                        "OK");
+                }
+            }
+            finally
+            {
+                button.IsEnabled = true;
+                isProcessing = false;
+            }
+        };
+    }
+
     private static Color GetColor(string key) =>
         (Color)Application.Current!.Resources[key];
 }

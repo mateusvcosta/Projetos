@@ -158,9 +158,8 @@ public sealed class InventoryView : ContentView
             new GridLength(120),
             new GridLength(140),
             new GridLength(160),
-            new GridLength(240),
-            new GridLength(90),
-            new GridLength(90)
+            new GridLength(180),
+            new GridLength(88)
         };
 
         Grid CreateRow(params View[] cells)
@@ -223,8 +222,7 @@ public sealed class InventoryView : ContentView
             AlignedLabel("Estado", TextAlignment.Start),
             AlignedLabel("Função", TextAlignment.Start),
             AlignedLabel("Observações", TextAlignment.Start),
-            CenteredLabel("Editar", ViewTheme.Muted, 12, true),
-            CenteredLabel("Remover", ViewTheme.Muted, 12, true));
+            CenteredLabel("Ações", ViewTheme.Muted, 12, true));
         headings.HeightRequest = 44;
         headings.BackgroundColor = ViewTheme.SurfaceDark;
         var headingsDivider = new BoxView
@@ -274,6 +272,19 @@ public sealed class InventoryView : ContentView
                 () => EditItem(table, capturedItem));
             var removeButton = TableAction("trash.svg", "Remover", ViewTheme.Accent,
                 () => RemoveItem(table, capturedItem));
+            var actionCell = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Auto)
+                },
+                ColumnSpacing = 8,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            };
+            actionCell.Add(editButton, 0, 0);
+            actionCell.Add(removeButton, 1, 0);
             var row = CreateRow(
                 itemCell,
                 AlignedLabel(ValueOrDash(item.Brand), TextAlignment.Start, ViewTheme.Muted, 12, false),
@@ -281,8 +292,7 @@ public sealed class InventoryView : ContentView
                 AlignedLabel(ValueOrDash(item.Condition), TextAlignment.Start, ViewTheme.Muted, 12, false),
                 AlignedLabel(ValueOrDash(item.Function), TextAlignment.Start, ViewTheme.Muted, 12, false),
                 AlignedLabel(ValueOrDash(item.Notes), TextAlignment.Start, ViewTheme.Muted, 12, false),
-                editButton,
-                removeButton);
+                actionCell);
             row.HeightRequest = 64;
             var rowDivider = new BoxView
             {
@@ -352,43 +362,23 @@ public sealed class InventoryView : ContentView
 
     private static View TableAction(string icon, string text, Color color, Func<Task> callback)
     {
-        var visual = new Grid
+        var button = new ImageButton
         {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(new GridLength(16)),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 6,
+            Source = ImageSource.FromFile(icon.Replace(".svg", ".png", StringComparison.OrdinalIgnoreCase)),
+            BackgroundColor = Colors.Transparent,
+            Padding = 8,
+            BorderWidth = 0,
+            BorderColor = Colors.Transparent,
+            CornerRadius = 6,
+            HeightRequest = 32,
+            WidthRequest = 32,
+            Aspect = Aspect.AspectFit,
             HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center
         };
-        visual.Add(new Image
-        {
-            Source = icon,
-            WidthRequest = 16,
-            HeightRequest = 16,
-            Aspect = Aspect.AspectFit
-        }, 0, 0);
-        visual.Add(ViewTheme.TextLabel(text, 13, true, color), 1, 0);
-
-        var button = new StateButton
-        {
-            Text = "",
-            BackgroundColor = Colors.Transparent,
-            Padding = 0,
-            CornerRadius = 0,
-            MinimumHeightRequest = 64,
-            MinimumWidthRequest = 0,
-            Opacity = 0
-        };
         SemanticProperties.SetDescription(button, text);
         ViewTheme.BindAction(button, callback);
-
-        var action = new Grid { HeightRequest = 64 };
-        action.Add(visual);
-        action.Add(button);
-        return action;
+        return button;
     }
 
     private async Task AddTable()

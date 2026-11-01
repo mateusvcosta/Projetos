@@ -14,7 +14,8 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         string relativeUri,
         CancellationToken cancellationToken = default)
         where T : class =>
-        await httpClient.GetFromJsonAsync<T>(relativeUri, JsonOptions, cancellationToken)
+        await httpClient.GetFromJsonAsync<T>(
+            ResolveUri(relativeUri), JsonOptions, cancellationToken)
         ?? throw new InvalidOperationException(
             $"The API returned an empty response for '{relativeUri}'.");
 
@@ -25,7 +26,7 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         where T : class
     {
         using var response = await httpClient.PostAsJsonAsync(
-            relativeUri, request, JsonOptions, cancellationToken);
+            ResolveUri(relativeUri), request, JsonOptions, cancellationToken);
         await EnsureSuccessAsync(response, relativeUri, cancellationToken);
         return await response.Content.ReadFromJsonAsync<T>(JsonOptions, cancellationToken)
             ?? throw new InvalidOperationException(
@@ -38,7 +39,7 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         CancellationToken cancellationToken = default)
     {
         using var response = await httpClient.PutAsJsonAsync(
-            relativeUri, request, JsonOptions, cancellationToken);
+            ResolveUri(relativeUri), request, JsonOptions, cancellationToken);
         await EnsureSuccessAsync(response, relativeUri, cancellationToken);
     }
 
@@ -46,7 +47,8 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         string relativeUri,
         CancellationToken cancellationToken = default)
     {
-        using var response = await httpClient.DeleteAsync(relativeUri, cancellationToken);
+        using var response = await httpClient.DeleteAsync(
+            ResolveUri(relativeUri), cancellationToken);
         await EnsureSuccessAsync(response, relativeUri, cancellationToken);
     }
 
@@ -63,5 +65,27 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         var details = await response.Content.ReadAsStringAsync(cancellationToken);
         throw new HttpRequestException(
             $"The API returned {(int)response.StatusCode} for '{relativeUri}': {details}");
+    }
+
+    private static Uri ResolveUri(string relativeUri)
+    {
+        var serviceUrl = relativeUri switch
+        {
+            var uri when uri.StartsWith("api/members", StringComparison.OrdinalIgnoreCase)
+                || uri.StartsWith("api/roles", StringComparison.OrdinalIgnoreCase)
+                => ApiServiceUrls.Members,
+            var uri when uri.StartsWith("api/events", StringComparison.OrdinalIgnoreCase)
+                => ApiServiceUrls.Events,
+            var uri when uri.StartsWith("api/documents", StringComparison.OrdinalIgnoreCase)
+                || uri.StartsWith("api/doc-types", StringComparison.OrdinalIgnoreCase)
+                => ApiServiceUrls.Documents,
+            var uri when uri.StartsWith("api/inventory", StringComparison.OrdinalIgnoreCase)
+                => ApiServiceUrls.Inventory,
+            _ => throw new ArgumentException(
+                $"No microservice is configured for URI '{relativeUri}'.",
+                nameof(relativeUri))
+        };
+
+        return new Uri(new Uri(serviceUrl), relativeUri);
     }
 }

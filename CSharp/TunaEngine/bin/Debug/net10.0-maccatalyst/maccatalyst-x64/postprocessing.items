@@ -8,6 +8,7 @@
       <dSYMSourcePathExists>false</dSYMSourcePathExists>
       <NoSymbolStrip>true</NoSymbolStrip>
       <dSYMInfoPlistRelativePath>TunaEngine.app.dSYM\Contents\Info.plist</dSYMInfoPlistRelativePath>
+      <SymbolFileLocalPath>obj\Debug\net10.0-maccatalyst\maccatalyst-x64\mtouch-symbols.list</SymbolFileLocalPath>
       <SymbolFile></SymbolFile>
       <DSymName>TunaEngine.app.dSYM</DSymName>
       <SourceProjectPath>C:\Users\Hp\OneDrive\Desktop\Projetos\CSharp\TunaEngine</SourceProjectPath>

@@ -248,28 +248,58 @@ public sealed class MembersView : ContentView
 
         var actionCell = new Grid
         {
-            Padding = new Thickness(0)
-        };
-        var actionButton = new StateButton
-        {
-            Text = "•••",
-            FontSize = 18,
-            BackgroundColor = Colors.Transparent,
-            TextColor = ViewTheme.Muted,
-            Padding = 0,
-            CornerRadius = 0,
-            MinimumWidthRequest = 18,
-            MinimumHeightRequest = 32,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 8,
             HorizontalOptions = LayoutOptions.End,
             VerticalOptions = LayoutOptions.Center
         };
-        SemanticProperties.SetDescription(actionButton, $"Ações para {member.Name}");
-        ViewTheme.BindAction(actionButton, () => MemberActions(member));
-        actionCell.Add(actionButton);
+        actionCell.Add(MemberAction("pencil.svg", $"Editar {member.Name}", ViewTheme.Muted,
+            () => EditMember(member), "MemberEditButton"), 0, 0);
+        actionCell.Add(MemberAction("trash.svg", $"Remover {member.Name}", ViewTheme.Error,
+            () => RemoveMember(member), "MemberRemoveButton"), 1, 0);
         row.Add(actionCell, 3, 0);
 
         AddBottomBorder(row);
         return row;
+    }
+
+    private static View MemberAction(
+        string icon,
+        string description,
+        Color color,
+        Func<Task> callback,
+        string automationId)
+        => TableAction(icon, description, color, callback, automationId);
+
+    private static View TableAction(
+        string icon,
+        string description,
+        Color color,
+        Func<Task> callback,
+        string automationId)
+    {
+        var button = new ImageButton
+        {
+            AutomationId = automationId,
+            Source = ImageSource.FromFile(icon.Replace(".svg", ".png", StringComparison.OrdinalIgnoreCase)),
+            BackgroundColor = Colors.Transparent,
+            Padding = 8,
+            BorderWidth = 0,
+            BorderColor = Colors.Transparent,
+            CornerRadius = 6,
+            HeightRequest = 32,
+            WidthRequest = 32,
+            Aspect = Aspect.AspectFit,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+        SemanticProperties.SetDescription(button, description);
+        ViewTheme.BindAction(button, callback);
+        return button;
     }
 
     private static Grid CreateTableRow(double height, Color? background = null)
@@ -285,7 +315,7 @@ public sealed class MembersView : ContentView
                 new ColumnDefinition(new GridLength(500, GridUnitType.Star)),
                 new ColumnDefinition(new GridLength(200, GridUnitType.Star)),
                 new ColumnDefinition(new GridLength(200, GridUnitType.Star)),
-                new ColumnDefinition(new GridLength(100, GridUnitType.Star))
+                new ColumnDefinition(new GridLength(180, GridUnitType.Star))
             }
         };
         return row;
@@ -304,7 +334,7 @@ public sealed class MembersView : ContentView
         row.Add(divider);
     }
 
-    private async Task MemberActions(TeamMember member)
+    private async Task RemoveMember(TeamMember member)
     {
         var shell = Shell.Current;
         if (shell is null)
@@ -312,30 +342,18 @@ public sealed class MembersView : ContentView
             return;
         }
 
-        var action = await shell.DisplayActionSheetAsync(
-            member.Name,
-            "Cancelar",
+        var confirmed = await shell.DisplayAlertAsync(
+            "Remover membro",
+            $"Remover “{member.Name}”?",
             "Remover",
-            "Editar");
-        if (action == "Editar")
+            "Cancelar");
+        if (!confirmed)
         {
-            await EditMember(member);
+            return;
         }
-        else if (action == "Remover")
-        {
-            var confirmed = await shell.DisplayAlertAsync(
-                "Remover membro",
-                $"Remover “{member.Name}”?",
-                "Remover",
-                "Cancelar");
-            if (!confirmed)
-            {
-                return;
-            }
 
-            AppSession.Members.Remove(member);
-            Render();
-        }
+        AppSession.Members.Remove(member);
+        Render();
     }
 
     private async Task EditMember(TeamMember? member)

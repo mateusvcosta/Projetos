@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="TunaEngine" mvid="ebf21cf0028a4982967c84e667e69398">
+<api type="debug" assembly-name="TunaEngine" mvid="10a3f5de58014c3e9741a513a280c7bb">
   <java-to-managed>
     <entry java-name="crc64c9b0ca92849a9944/MainActivity" managed-name="TunaEngine.MainActivity, TunaEngine" managed-type-token-id="33554453" />
     <entry java-name="crc64c9b0ca92849a9944/MainApplication" managed-name="TunaEngine.MainApplication, TunaEngine" managed-type-token-id="33554454" />

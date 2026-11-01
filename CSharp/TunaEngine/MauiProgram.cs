@@ -26,7 +26,10 @@ public static class MauiProgram
 			{
 				if (view is Button
 					{
-						AutomationId: "LoginShowPasswordButton" or "LoginForgotPasswordButton"
+						AutomationId: "LoginShowPasswordButton"
+							or "LoginForgotPasswordButton"
+							or "MemberEditButton"
+							or "MemberRemoveButton"
 					})
 				{
 					handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
@@ -47,7 +50,6 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton(_ => new HttpClient
 		{
-			BaseAddress = new Uri("https://tunaengine.onrender.com/"),
 			Timeout = TimeSpan.FromSeconds(30)
 		});
 		builder.Services.AddSingleton<TunaEngineApiClient>();

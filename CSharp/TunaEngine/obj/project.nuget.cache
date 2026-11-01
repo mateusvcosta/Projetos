@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "rNmuvs33q40=",
+  "dgSpecHash": "po1gAGBryP8=",
   "success": true,
   "projectFilePath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine\\TunaEngine.csproj",
   "expectedPackageFiles": [
@@ -144,6 +144,10 @@
     "C:\\Users\\Hp\\.nuget\\packages\\xamarin.kotlinx.serialization.core\\1.9.0.1\\xamarin.kotlinx.serialization.core.1.9.0.1.nupkg.sha512",
     "C:\\Users\\Hp\\.nuget\\packages\\xamarin.kotlinx.serialization.core.jvm\\1.9.0.1\\xamarin.kotlinx.serialization.core.jvm.1.9.0.1.nupkg.sha512",
     "C:\\Users\\Hp\\.nuget\\packages\\zstdsharp.port\\0.7.3\\zstdsharp.port.0.7.3.nupkg.sha512",
+    "C:\\Users\\Hp\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\10.0.14\\microsoft.netcore.app.runtime.win-x64.10.0.14.nupkg.sha512",
+    "C:\\Users\\Hp\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\10.0.14\\microsoft.windowsdesktop.app.runtime.win-x64.10.0.14.nupkg.sha512",
+    "C:\\Users\\Hp\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\10.0.14\\microsoft.aspnetcore.app.runtime.win-x64.10.0.14.nupkg.sha512",
+    "C:\\Users\\Hp\\.nuget\\packages\\microsoft.netcore.app.crossgen2.win-x64\\10.0.14\\microsoft.netcore.app.crossgen2.win-x64.10.0.14.nupkg.sha512",
     "C:\\Users\\Hp\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512"
   ],
   "logs": []
