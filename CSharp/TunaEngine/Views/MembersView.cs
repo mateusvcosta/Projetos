@@ -343,11 +343,12 @@ public sealed class MembersView : ContentView
             return;
         }
 
-        var confirmed = await shell.DisplayAlertAsync(
+        var popup = new ConfirmationPopup(
             "Remover membro",
-            $"Remover “{member.Name}”?",
-            "Remover",
-            "Cancelar");
+            $"Tem a certeza de que pretende remover “{member.Name}”?",
+            "Remover");
+        var confirmed = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
         if (!confirmed)
         {
             return;

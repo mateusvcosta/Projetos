@@ -49,7 +49,7 @@ public sealed class DocumentsController(DocumentsInterface service) : Controller
             return BadRequest(new { error = "The document id must be a MongoDB ObjectId." });
         }
 
-        var errors = request.GetValidationErrors();
+        var errors = request.GetValidationErrors(requireBusinessId: true);
         if (errors.Count > 0)
         {
             return BadRequest(new ValidationProblemDetails(errors));
@@ -69,5 +69,4 @@ public sealed class DocumentsController(DocumentsInterface service) : Controller
         return await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
     }
 }
-
 

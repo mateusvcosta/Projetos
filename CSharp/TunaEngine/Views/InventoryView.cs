@@ -477,7 +477,9 @@ public sealed class InventoryView : ContentView
             var message = $"Não foi possível guardar o item: {exception.Message}";
             _status.Text = message;
             _status.TextColor = ViewTheme.Error;
-            await shell.DisplayAlertAsync("Inventário", message, "OK");
+            var errorPopup = new MessagePopup("Inventário", message);
+            await ModalOverlay.ShowAsync(
+                shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
             return;
         }
 
@@ -510,11 +512,12 @@ public sealed class InventoryView : ContentView
             return;
         }
 
-        var confirmed = await shell.DisplayAlertAsync(
+        var popup = new ConfirmationPopup(
             "Remover item",
-            $"Remover “{item.Name}”?",
-            "Remover",
-            "Cancelar");
+            $"Tem a certeza de que pretende remover “{item.Name}”?",
+            "Remover");
+        var confirmed = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
         if (!confirmed)
         {
             return;
@@ -530,7 +533,9 @@ public sealed class InventoryView : ContentView
             var message = $"Não foi possível remover o item: {exception.Message}";
             _status.Text = message;
             _status.TextColor = ViewTheme.Error;
-            await shell.DisplayAlertAsync("Inventário", message, "OK");
+            var errorPopup = new MessagePopup("Inventário", message);
+            await ModalOverlay.ShowAsync(
+                shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
             return;
         }
         table.Items.Remove(item);

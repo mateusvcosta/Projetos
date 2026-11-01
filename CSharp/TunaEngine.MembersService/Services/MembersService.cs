@@ -9,7 +9,8 @@ namespace TunaEngine.MembersService.Services;
 
 public sealed class MembersService(
     IMongoCollection<Members> members,
-    IPasswordHasher<Members> passwordHasher) : MembersInterface
+    IPasswordHasher<Members> passwordHasher,
+    SequenceGenerator sequences) : MembersInterface
 {
     public async Task<IReadOnlyList<Members>> GetAllMembers(
         CancellationToken cancellationToken)
@@ -82,6 +83,7 @@ public sealed class MembersService(
     {
         var id = ObjectId.GenerateNewId().ToString();
         var item = request.ToDocument(id, DateTime.UtcNow);
+        item.MemberId = await sequences.NextAsync("members", "MEM", cancellationToken);
         item.PasswordHash = passwordHasher.HashPassword(item, request.Password!);
         await members.InsertOneAsync(item, cancellationToken: cancellationToken);
         return item;
@@ -133,4 +135,3 @@ public sealed class MembersService(
         return result.DeletedCount > 0;
     }
 }
-

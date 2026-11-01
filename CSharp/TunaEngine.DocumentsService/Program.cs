@@ -24,6 +24,11 @@ builder.Services.AddSingleton(provider =>
     provider.GetRequiredService<IMongoClient>()
         .GetDatabase(mongoSettings.DocumentsDatabaseName)
         .GetCollection<Documents>(mongoSettings.DocumentsCollectionName));
+builder.Services.AddSingleton(provider =>
+    provider.GetRequiredService<IMongoClient>()
+        .GetDatabase(mongoSettings.DocumentsDatabaseName)
+        .GetCollection<MongoDB.Bson.BsonDocument>("Sequences"));
+builder.Services.AddSingleton<SequenceGenerator>();
 builder.Services.AddScoped<DocumentsInterface, DocumentsService>();
 builder.Services.AddScoped<DocumentTypesInterface, DocumentTypesService>();
 builder.Services.AddControllers();

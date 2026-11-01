@@ -6,7 +6,8 @@ using TunaEngine.MembersService.Models;
 namespace TunaEngine.MembersService.Services;
 
 public sealed class RolesService(
-    IMongoCollection<Roles> roles) : RolesInterface
+    IMongoCollection<Roles> roles,
+    SequenceGenerator sequences) : RolesInterface
 {
     public async Task<IReadOnlyList<Roles>> GetAllRoles(
         CancellationToken cancellationToken)
@@ -31,6 +32,7 @@ public sealed class RolesService(
     {
         var id = ObjectId.GenerateNewId().ToString();
         var item = request.ToDocument(id);
+        item.Id_Cargo = await sequences.NextAsync("roles", "CAR", cancellationToken);
         await roles.InsertOneAsync(item, cancellationToken: cancellationToken);
         return item;
     }
@@ -76,4 +78,3 @@ public sealed class RolesService(
         return result.DeletedCount > 0;
     }
 }
-

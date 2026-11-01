@@ -10,11 +10,11 @@ public sealed class DocumentsRequest
     public string? Added_By { get; init; }
     public string? Obs { get; init; }
 
-    public Dictionary<string, string[]> GetValidationErrors()
+    public Dictionary<string, string[]> GetValidationErrors(bool requireBusinessId = false)
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (string.IsNullOrWhiteSpace(Id_Documento))
+        if (requireBusinessId && string.IsNullOrWhiteSpace(Id_Documento))
         {
             errors[nameof(Id_Documento)] = ["Document id is required."];
         }
@@ -40,7 +40,7 @@ public sealed class DocumentsRequest
     public Documents ToDocument(string id) => new()
     {
         Id = id,
-        Id_Documento = Id_Documento!.Trim(),
+        Id_Documento = Id_Documento?.Trim() ?? "",
         Tipo_Documento = Tipo_Documento!.Trim(),
         Id_Doc_Type = Id_Doc_Type!.Trim(),
         File_Path = File_Path?.Trim() ?? "",
@@ -49,5 +49,4 @@ public sealed class DocumentsRequest
         Obs = Obs?.Trim() ?? ""
     };
 }
-
 

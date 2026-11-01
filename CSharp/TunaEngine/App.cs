@@ -19,6 +19,7 @@ public sealed class App : Application
         resources.Add("ThemeText", Color.FromArgb("#F6F6FA"));
         resources.Add("ThemeMuted", Color.FromArgb("#9999BB"));
         resources.Add("ThemeError", Color.FromArgb("#F28A9A"));
+        resources.Add("ThemeDanger", Color.FromArgb("#D9364F"));
         Resources = resources;
     }
 

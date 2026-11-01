@@ -14,6 +14,8 @@ builder.Services.AddSingleton(mongoSettings);
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoSettings.ConnectionString));
 builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.RolesDatabaseName).GetCollection<Roles>(mongoSettings.RolesCollectionName));
 builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.MembersDatabaseName).GetCollection<Members>(mongoSettings.MembersCollectionName));
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.MembersDatabaseName).GetCollection<MongoDB.Bson.BsonDocument>("Sequences"));
+builder.Services.AddSingleton<SequenceGenerator>();
 builder.Services.AddScoped<IPasswordHasher<Members>, PasswordHasher<Members>>();
 builder.Services.AddScoped<MembersInterface, MembersService>();
 builder.Services.AddScoped<RolesInterface, RolesService>();

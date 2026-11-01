@@ -11,6 +11,7 @@ internal static class ViewTheme
     public static Color Text => GetColor("ThemeText");
     public static Color Muted => GetColor("ThemeMuted");
     public static Color Error => GetColor("ThemeError");
+    public static Color Danger => GetColor("ThemeDanger");
 
     public static Label TextLabel(string text, double size = 14, bool bold = false, Color? color = null) =>
         new()

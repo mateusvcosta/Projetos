@@ -12,6 +12,8 @@ if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
 builder.Services.AddSingleton(mongoSettings);
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoSettings.ConnectionString));
 builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.InventoryDatabaseName).GetCollection<InventoryItem>(mongoSettings.InventoryCollectionName));
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.InventoryDatabaseName).GetCollection<MongoDB.Bson.BsonDocument>("Sequences"));
+builder.Services.AddSingleton<SequenceGenerator>();
 
 builder.Services.AddScoped<InventoryInterface, InventoryService>();
 builder.Services.AddControllers();
@@ -19,4 +21,3 @@ var app = builder.Build();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "TunaEngine.InventoryService" }));
 app.MapControllers();
 app.Run();
-

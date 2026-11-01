@@ -12,6 +12,8 @@ if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
 builder.Services.AddSingleton(mongoSettings);
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoSettings.ConnectionString));
 builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.EventsDatabaseName).GetCollection<Events>(mongoSettings.EventsCollectionName));
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.EventsDatabaseName).GetCollection<MongoDB.Bson.BsonDocument>("Sequences"));
+builder.Services.AddSingleton<SequenceGenerator>();
 
 builder.Services.AddScoped<EventsInterface, EventsService>();
 builder.Services.AddControllers();

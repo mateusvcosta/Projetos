@@ -2,8 +2,11 @@ namespace TunaEngine.Views;
 
 public sealed class SettingsView : ContentView
 {
-    public SettingsView()
+    private readonly Func<Task> _signOut;
+
+    public SettingsView(Func<Task> signOut)
     {
+        _signOut = signOut;
         var content = new VerticalStackLayout { Spacing = 16 };
         var title = ViewTheme.TextLabel("Definições", 30, true);
         SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
@@ -25,7 +28,7 @@ public sealed class SettingsView : ContentView
         }
 
         content.Children.Add(CreateSectionLabel("Zona de perigo"));
-        content.Children.Add(CreateDangerRow("Terminar Sessão", ShowSignOutInfo));
+        content.Children.Add(CreateDangerRow("Terminar Sessão", _signOut));
         content.Children.Add(ViewTheme.TextLabel(
             "TunaEngine · Versão de demonstração",
             12,
@@ -197,15 +200,4 @@ public sealed class SettingsView : ContentView
         }
     }
 
-    private static async Task ShowSignOutInfo()
-    {
-        var shell = Shell.Current;
-        if (shell is not null)
-        {
-            await shell.DisplayAlertAsync(
-                "Sessão de demonstração",
-                "Não existe uma sessão autenticada nesta implementação.",
-                "OK");
-        }
-    }
 }

@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using TunaEngine.Services;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine.Views;
 
@@ -47,32 +48,47 @@ public sealed class ProfileView : ContentView
             return;
         }
 
-        var name = await shell.DisplayPromptAsync(
-            "Editar perfil", "Nome:", "Continuar", "Cancelar", initialValue: AppSession.ProfileName);
-        if (string.IsNullOrWhiteSpace(name))
-        {
+        var popup = new EditProfilePopup();
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
+        if (draft is null || string.IsNullOrWhiteSpace(AppSession.ProfileMemberId))
             return;
-        }
 
-        var email = await shell.DisplayPromptAsync(
-            "Editar perfil", "Email:", "Continuar", "Cancelar",
-            keyboard: Keyboard.Email, initialValue: AppSession.ProfileEmail);
-        if (string.IsNullOrWhiteSpace(email))
+        try
         {
-            return;
+            await _apiClient.PutAsync(
+                $"api/members/{AppSession.ProfileMemberId}",
+                new
+                {
+                    name = draft.Name,
+                    email = draft.Email,
+                    tunaName = draft.TunaName,
+                    phone = draft.Phone,
+                    studentNumber = draft.StudentNumber,
+                    roleId = AppSession.ProfileRole,
+                    voiceType = draft.VoiceType,
+                    instrument = draft.Instrument,
+                    password = draft.Password
+                });
+            AppSession.ProfileName = draft.Name;
+            AppSession.ProfileEmail = draft.Email;
+            AppSession.ProfileTunaName = draft.TunaName;
+            AppSession.ProfilePhone = draft.Phone;
+            AppSession.ProfileStudentNumber = draft.StudentNumber;
+            AppSession.ProfileVoiceType = draft.VoiceType;
+            AppSession.ProfileInstrument = draft.Instrument;
+            _statusLabel.Text = "Perfil atualizado";
+            UpdateLabels();
         }
-
-        var role = await shell.DisplayPromptAsync(
-            "Editar perfil", "Cargo na equipa:", "Guardar", "Cancelar", initialValue: AppSession.ProfileRole);
-        if (string.IsNullOrWhiteSpace(role))
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
         {
-            return;
+            var message = $"Não foi possível atualizar o perfil: {exception.Message}";
+            _statusLabel.Text = message;
+            var errorPopup = new MessagePopup("Perfil", message);
+            await ModalOverlay.ShowAsync(
+                shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
         }
-
-        AppSession.ProfileName = name.Trim();
-        AppSession.ProfileEmail = email.Trim();
-        AppSession.ProfileRole = role.Trim();
-        UpdateLabels();
     }
 
     private Border CreateHeroCard()

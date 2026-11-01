@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TunaEngine.DocumentsService")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a4255e888b90fa12471a95c8ecc2d7ce559e1a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ce692d362f0e9c09372f80081a539a359f62a00")]
 [assembly: System.Reflection.AssemblyProductAttribute("TunaEngine.DocumentsService")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TunaEngine.DocumentsService")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

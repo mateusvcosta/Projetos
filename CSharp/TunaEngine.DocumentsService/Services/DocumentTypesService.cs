@@ -6,7 +6,8 @@ using TunaEngine.DocumentsService.Models;
 namespace TunaEngine.DocumentsService.Services;
 
 public sealed class DocumentTypesService(
-    IMongoCollection<DocumentType> documentTypes) : DocumentTypesInterface
+    IMongoCollection<DocumentType> documentTypes,
+    SequenceGenerator sequences) : DocumentTypesInterface
 {
     public async Task<IReadOnlyList<DocumentType>> GetAll(CancellationToken cancellationToken) =>
         await documentTypes.Find(FilterDefinition<DocumentType>.Empty)
@@ -21,6 +22,7 @@ public sealed class DocumentTypesService(
         CancellationToken cancellationToken)
     {
         var item = request.ToDocument(ObjectId.GenerateNewId().ToString());
+        item.Id_Doc_Type = await sequences.NextAsync("document-types", "TIP", cancellationToken);
         await documentTypes.InsertOneAsync(item, cancellationToken: cancellationToken);
         return item;
     }
@@ -45,5 +47,4 @@ public sealed class DocumentTypesService(
         return result.DeletedCount > 0;
     }
 }
-
 

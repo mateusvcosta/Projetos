@@ -6,7 +6,8 @@ using TunaEngine.EventsService.Models;
 namespace TunaEngine.EventsService.Services;
 
 public sealed class EventsService(
-    IMongoCollection<Events> events) : EventsInterface
+    IMongoCollection<Events> events,
+    SequenceGenerator sequences) : EventsInterface
 {
     public async Task<IReadOnlyList<Events>> GetAll(CancellationToken cancellationToken) =>
         await events.Find(FilterDefinition<Events>.Empty)
@@ -21,6 +22,7 @@ public sealed class EventsService(
         CancellationToken cancellationToken)
     {
         var item = request.ToDocument(ObjectId.GenerateNewId().ToString());
+        item.Id_Event = await sequences.NextAsync("events", "EVT", cancellationToken);
         await events.InsertOneAsync(item, cancellationToken: cancellationToken);
         return item;
     }
@@ -50,4 +52,3 @@ public sealed class EventsService(
         return result.DeletedCount > 0;
     }
 }
-

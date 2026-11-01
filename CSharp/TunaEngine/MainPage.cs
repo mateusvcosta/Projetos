@@ -35,9 +35,12 @@ public sealed class MainPage : ContentPage
     private bool isMenuVisible;
     private bool hasAppliedLayout;
 
-    public MainPage(TunaEngineApiClient apiClient)
+    private readonly Func<Task> _signOut;
+
+    public MainPage(TunaEngineApiClient apiClient, Func<Task>? signOut = null)
     {
         _apiClient = apiClient;
+        _signOut = signOut ?? (() => Task.CompletedTask);
         BackgroundColor = ViewTheme.Background;
         Shell.SetNavBarIsVisible(this, false);
 
@@ -588,7 +591,7 @@ public sealed class MainPage : ContentPage
             "Membros" => new MembersView(_apiClient),
             "Documentos" => new DocumentsView(_apiClient),
             "Perfil" => new ProfileView(_apiClient),
-            "Definições" => new SettingsView(),
+            "Definições" => new SettingsView(_signOut),
             _ => new HomeView(isWideLayout, _apiClient)
         };
 

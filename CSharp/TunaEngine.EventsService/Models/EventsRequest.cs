@@ -10,11 +10,11 @@ public sealed class EventsRequest
     public List<EventInstrument> Instruments_Needed { get; init; } = [];
     public List<EventRide> Boleias { get; init; } = [];
 
-    public Dictionary<string, string[]> GetValidationErrors()
+    public Dictionary<string, string[]> GetValidationErrors(bool requireBusinessId = false)
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (string.IsNullOrWhiteSpace(Id_Event))
+        if (requireBusinessId && string.IsNullOrWhiteSpace(Id_Event))
         {
             errors[nameof(Id_Event)] = ["Event id is required."];
         }
@@ -50,7 +50,7 @@ public sealed class EventsRequest
     public Events ToDocument(string id) => new()
     {
         Id = id,
-        Id_Event = Id_Event!.Trim(),
+        Id_Event = Id_Event?.Trim() ?? "",
         Date_Hour = Date_Hour!.Value.UtcDateTime,
         Name = Name!.Trim(),
         Location = Location!.Trim(),
@@ -59,4 +59,3 @@ public sealed class EventsRequest
         Boleias = Boleias
     };
 }
-

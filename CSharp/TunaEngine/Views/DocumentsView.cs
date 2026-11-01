@@ -110,7 +110,7 @@ public sealed class DocumentsView : ContentView
                 "api/documents",
                 new ApiDocumentRequest
                 {
-                    DocumentCode = $"DOC-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
+                    DocumentCode = "",
                     Type = draft.Type,
                     DocumentTypeCode = draft.TypeCode,
                     FilePath = draft.FilePath,
@@ -126,7 +126,9 @@ public sealed class DocumentsView : ContentView
             var message = $"Não foi possível guardar o documento: {exception.Message}";
             _status.Text = message;
             _status.TextColor = ViewTheme.Error;
-            await shell.DisplayAlertAsync("Documentos", message, "OK");
+            var errorPopup = new MessagePopup("Documentos", message);
+            await ModalOverlay.ShowAsync(
+                shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
         }
     }
 }

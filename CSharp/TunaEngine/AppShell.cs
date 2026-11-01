@@ -1,5 +1,6 @@
 ﻿using TunaEngine.Services;
 using TunaEngine.Views;
+using TunaEngine.Views.Popups;
 
 namespace TunaEngine;
 
@@ -40,7 +41,7 @@ public sealed class AppShell : Shell
         var content = new ShellContent
         {
             Title = "Home",
-            ContentTemplate = new DataTemplate(() => new MainPage(apiClient)),
+            ContentTemplate = new DataTemplate(() => new MainPage(apiClient, () => SignOut(apiClient))),
             Route = "MainPage"
         };
         var section = new ShellSection();
@@ -48,5 +49,26 @@ public sealed class AppShell : Shell
         var item = new ShellItem();
         item.Items.Add(section);
         Items.Add(item);
+    }
+
+    private async Task SignOut(TunaEngineApiClient apiClient)
+    {
+        if (CurrentPage is not ContentPage page)
+            return;
+
+        var popup = new ConfirmationPopup(
+            "Terminar sessão",
+            "Tem a certeza de que pretende terminar a sessão?",
+            "Terminar");
+        var confirmed = await ModalOverlay.ShowAsync(
+            page, popup, popup.Completion, popup.Cancel);
+        if (!confirmed)
+            return;
+
+        AppSession.ProfileMemberId = "";
+        AppSession.ProfileName = "";
+        AppSession.ProfileEmail = "";
+        AppSession.ProfileRole = "";
+        ShowLogin(apiClient);
     }
 }

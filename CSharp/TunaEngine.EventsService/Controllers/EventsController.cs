@@ -49,7 +49,7 @@ public sealed class EventsController(EventsInterface service) : ControllerBase
             return BadRequest(new { error = "The event id must be a MongoDB ObjectId." });
         }
 
-        var errors = request.GetValidationErrors();
+        var errors = request.GetValidationErrors(requireBusinessId: true);
         if (errors.Count > 0)
         {
             return BadRequest(new ValidationProblemDetails(errors));
@@ -69,4 +69,3 @@ public sealed class EventsController(EventsInterface service) : ControllerBase
         return await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
     }
 }
-

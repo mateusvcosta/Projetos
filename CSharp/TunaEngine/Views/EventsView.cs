@@ -122,7 +122,7 @@ public sealed class EventsView : ContentView
                 "api/events",
                 new ApiEventRequest
                 {
-                    EventCode = $"EVT-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
+                    EventCode = "",
                     Name = draft.Title,
                     Location = draft.Description,
                     Date = AppSession.SelectedDate
@@ -135,7 +135,9 @@ public sealed class EventsView : ContentView
             var message = $"Não foi possível guardar o evento: {exception.Message}";
             _status.Text = message;
             _status.TextColor = ViewTheme.Error;
-            await shell.DisplayAlertAsync("Eventos", message, "OK");
+            var errorPopup = new MessagePopup("Eventos", message);
+            await ModalOverlay.ShowAsync(
+                shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
         }
     }
 }
