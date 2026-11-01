@@ -69,23 +69,13 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
 
     private static Uri ResolveUri(string relativeUri)
     {
-        var serviceUrl = relativeUri switch
+        if (!relativeUri.StartsWith("api/", StringComparison.OrdinalIgnoreCase))
         {
-            var uri when uri.StartsWith("api/members", StringComparison.OrdinalIgnoreCase)
-                || uri.StartsWith("api/roles", StringComparison.OrdinalIgnoreCase)
-                => ApiServiceUrls.Members,
-            var uri when uri.StartsWith("api/events", StringComparison.OrdinalIgnoreCase)
-                => ApiServiceUrls.Events,
-            var uri when uri.StartsWith("api/documents", StringComparison.OrdinalIgnoreCase)
-                || uri.StartsWith("api/doc-types", StringComparison.OrdinalIgnoreCase)
-                => ApiServiceUrls.Documents,
-            var uri when uri.StartsWith("api/inventory", StringComparison.OrdinalIgnoreCase)
-                => ApiServiceUrls.Inventory,
-            _ => throw new ArgumentException(
-                $"No microservice is configured for URI '{relativeUri}'.",
-                nameof(relativeUri))
-        };
+            throw new ArgumentException(
+                $"Gateway paths must start with 'api/': '{relativeUri}'.",
+                nameof(relativeUri));
+        }
 
-        return new Uri(new Uri(serviceUrl), relativeUri);
+        return new Uri(new Uri(ApiServiceUrls.Gateway), relativeUri);
     }
 }

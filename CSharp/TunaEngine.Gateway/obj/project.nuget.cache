@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "3BGqeWOEakQ=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Hp\\OneDrive\\Desktop\\Projetos\\CSharp\\TunaEngine.Gateway\\TunaEngine.Gateway.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Hp\\.nuget\\packages\\system.io.hashing\\8.0.0\\system.io.hashing.8.0.0.nupkg.sha512",
+    "C:\\Users\\Hp\\.nuget\\packages\\yarp.reverseproxy\\2.3.0\\yarp.reverseproxy.2.3.0.nupkg.sha512"
+  ],
+  "logs": []
+}

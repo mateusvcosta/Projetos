@@ -1,6 +1,7 @@
 # TunaEngine: serviços independentes no Render
 
-A API foi separada em quatro aplicações ASP.NET Core independentes:
+A API foi separada em quatro aplicações ASP.NET Core independentes e um API
+Gateway:
 
 | Serviço | Responsabilidade | Porta local |
 |---|---|---:|
@@ -8,9 +9,10 @@ A API foi separada em quatro aplicações ASP.NET Core independentes:
 | `TunaEngine.EventsService` | eventos | 10002 |
 | `TunaEngine.DocumentsService` | documentos e tipos de documento | 10004 |
 | `TunaEngine.InventoryService` | inventário | 10003 |
+| `TunaEngine.Gateway` | ponto de entrada e encaminhamento | 10000 |
 
 Cada aplicação tem um projeto `.csproj`, um `Dockerfile` e um endpoint
-`GET /health`. As rotas funcionais foram mantidas, por exemplo:
+`GET /health`. As rotas funcionais são:
 
 ```text
 /api/members
@@ -30,82 +32,101 @@ dotnet run --project .\TunaEngine.MembersService
 dotnet run --project .\TunaEngine.EventsService
 dotnet run --project .\TunaEngine.DocumentsService
 dotnet run --project .\TunaEngine.InventoryService
+dotnet run --project .\TunaEngine.Gateway
 ```
 
-É necessário definir `MongoDb__ConnectionString` no ambiente de cada processo.
-As restantes configurações têm valores por omissão compatíveis com a base de
-dados existente.
+É necessário definir `MongoDb__ConnectionString` no ambiente de cada
+microservice. O Gateway não acede ao MongoDB.
 
 ## Configuração no Render
 
-Criar quatro serviços do tipo **Web Service** com runtime **Docker**, ligados ao
-mesmo repositório:
+Criar cinco serviços do tipo **Web Service**, com runtime **Docker**, ligados
+ao mesmo repositório:
 
-1. `tunaengine-members`
+1. `tunaengine-membersservice`
    - Root Directory: `CSharp/TunaEngine.MembersService`
-   - Dockerfile: `Dockerfile`
-2. `tunaengine-events`
+   - Dockerfile Path: `Dockerfile`
+   - Docker Build Context Directory: `.`
+2. `tunaengine-eventsservice`
    - Root Directory: `CSharp/TunaEngine.EventsService`
-   - Dockerfile: `Dockerfile`
-3. `tunaengine-documents`
+   - Dockerfile Path: `Dockerfile`
+   - Docker Build Context Directory: `.`
+3. `tunaengine-documentsservice`
    - Root Directory: `CSharp/TunaEngine.DocumentsService`
-   - Dockerfile: `Dockerfile`
-4. `tunaengine-inventory`
+   - Dockerfile Path: `Dockerfile`
+   - Docker Build Context Directory: `.`
+4. `tunaengine-inventoryservice`
    - Root Directory: `CSharp/TunaEngine.InventoryService`
-   - Dockerfile: `Dockerfile`
+   - Dockerfile Path: `Dockerfile`
+   - Docker Build Context Directory: `.`
+5. `tunaengine-gateway`
+   - Root Directory: `CSharp/TunaEngine.Gateway`
+   - Dockerfile Path: `Dockerfile`
+   - Docker Build Context Directory: `.`
 
-Os nomes acima são os nomes esperados pela aplicação MAUI, que utiliza os
-seguintes endereços:
-
-```text
-https://tunaengine-members.onrender.com/
-https://tunaengine-events.onrender.com/
-https://tunaengine-documents.onrender.com/
-https://tunaengine-inventory.onrender.com/
-```
-
-Se forem escolhidos nomes diferentes no Render, atualizar as constantes em
-`TunaEngine/Services/ApiServiceUrls.cs` antes de gerar a aplicação cliente.
-
-Em cada serviço, adicionar a variável:
+Nos quatro microservices, adicionar:
 
 ```text
 MongoDb__ConnectionString=<connection string do MongoDB>
 ```
 
-O Render fornece automaticamente a variável `PORT`. Os Dockerfiles utilizam
-essa variável e usam `10001`, `10002` e `10003` apenas como valores locais por
-omissão. Não é necessário configurar manualmente uma porta pública fixa.
+Não adicionar esta variável ao Gateway. O Render fornece automaticamente a
+variável `PORT`, utilizada por todos os Dockerfiles.
 
-Depois do primeiro deployment, validar:
+O cliente MAUI deve utilizar apenas:
 
 ```text
-https://<members-service>.onrender.com/health
-https://<events-service>.onrender.com/health
-https://<documents-service>.onrender.com/health
-https://<inventory-service>.onrender.com/health
+https://tunaengine-gateway.onrender.com/
 ```
 
-O plano gratuito do Render pode suspender serviços sem tráfego. O primeiro
-pedido depois dessa suspensão pode demorar mais tempo, sem representar uma
-falha da API.
+Se o Gateway tiver outro nome, atualizar `ApiServiceUrls.Gateway` em
+`TunaEngine/Services/ApiServiceUrls.cs` antes de gerar a aplicação cliente.
+
+Os destinos predefinidos do Gateway são:
+
+```text
+https://tunaengine-membersservice.onrender.com/
+https://tunaengine-eventsservice.onrender.com/
+https://tunaengine-documentsservice.onrender.com/
+https://tunaengine-inventoryservice.onrender.com/
+```
+
+Se algum microservice tiver outro URL, configurar no Gateway a variável
+correspondente: `MembersServiceUrl`, `EventsServiceUrl`,
+`DocumentsServiceUrl` ou `InventoryServiceUrl`.
+
+## Validação
+
+Validar cada serviço diretamente:
+
+```text
+https://tunaengine-membersservice.onrender.com/health
+https://tunaengine-eventsservice.onrender.com/health
+https://tunaengine-documentsservice.onrender.com/health
+https://tunaengine-inventoryservice.onrender.com/health
+```
+
+Validar o Gateway:
+
+```text
+https://tunaengine-gateway.onrender.com/health
+```
+
+O Gateway encaminha `/api/members` e `/api/roles` para Members, `/api/events`
+para Events, `/api/documents` e `/api/doc-types` para Documents, e
+`/api/inventory` para Inventory.
 
 ## Bases de dados MongoDB
 
 Os serviços usam a mesma ligação MongoDB, mas bases de dados separadas:
 
-- Members service: base de dados `Members`, com as coleções `Members` e `Roles`;
-- Events service: `Events`;
-- Documents service: `Documents` e `Doc_Type`;
-- Inventory service: `Inventory`.
+- Members: base de dados `Members`, com as coleções `Members` e `Roles`;
+- Events: base de dados `Events`;
+- Documents: bases de dados `Documents` e `Doc_Type`;
+- Inventory: base de dados `Inventory`.
 
 Esta separação evita que um serviço aceda diretamente às coleções dos outros
-domínios e permite migrar cada serviço de forma independente.
+domínios e permite atualizar cada serviço de forma independente.
 
-## Limitação atual
-
-Os quatro serviços são independentes e podem ser publicados separadamente, mas
-não existe ainda um API Gateway. Os clientes devem utilizar o URL do serviço
-que disponibiliza cada recurso. Um gateway pode ser acrescentado futuramente
-para oferecer um único URL público e encaminhar cada rota para o serviço
-correspondente.
+O plano gratuito do Render pode suspender serviços sem tráfego. O primeiro
+pedido depois dessa suspensão pode demorar mais tempo.
