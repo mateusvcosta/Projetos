@@ -527,8 +527,10 @@ public sealed class InventoryView : ContentView
         catch (Exception exception) when (
             exception is HttpRequestException or TaskCanceledException or InvalidOperationException)
         {
-            _status.Text = $"Não foi possível remover o item: {exception.Message}";
+            var message = $"Não foi possível remover o item: {exception.Message}";
+            _status.Text = message;
             _status.TextColor = ViewTheme.Error;
+            await shell.DisplayAlertAsync("Inventário", message, "OK");
             return;
         }
         table.Items.Remove(item);

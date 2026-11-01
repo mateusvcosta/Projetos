@@ -353,8 +353,20 @@ public sealed class MembersView : ContentView
             return;
         }
 
-        AppSession.Members.Remove(member);
-        Render();
+        try
+        {
+            await _apiClient.DeleteAsync($"api/members/{member.Id}");
+            AppSession.Members.Remove(member);
+            Render();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            var message = $"Não foi possível remover o membro: {exception.Message}";
+            _status.Text = message;
+            _status.TextColor = ViewTheme.Error;
+            await shell.DisplayAlertAsync("Membros", message, "OK");
+        }
     }
 
     private async Task EditMember(TeamMember? member)

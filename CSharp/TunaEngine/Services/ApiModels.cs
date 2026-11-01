@@ -95,6 +95,18 @@ public sealed class ApiEvent
     public DateTime Date { get; set; }
 }
 
+public sealed class ApiEventRequest
+{
+    [JsonPropertyName("id_Event")]
+    public string EventCode { get; init; } = "";
+
+    [JsonPropertyName("date_Hour")]
+    public DateTimeOffset Date { get; init; }
+
+    public string Name { get; init; } = "";
+    public string Location { get; init; } = "";
+}
+
 public sealed class ApiDocument
 {
     public string Id { get; set; } = "";

@@ -123,8 +123,10 @@ public sealed class DocumentsView : ContentView
         catch (Exception exception) when (
             exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
         {
-            _status.Text = $"Não foi possível guardar o documento: {exception.Message}";
+            var message = $"Não foi possível guardar o documento: {exception.Message}";
+            _status.Text = message;
             _status.TextColor = ViewTheme.Error;
+            await shell.DisplayAlertAsync("Documentos", message, "OK");
         }
     }
 }

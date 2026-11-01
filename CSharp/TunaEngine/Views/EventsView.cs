@@ -116,13 +116,27 @@ public sealed class EventsView : ContentView
             return;
         }
 
-        AppSession.Events.Add(new AgendaEvent
+        try
         {
-            Title = draft.Title,
-            Description = draft.Description,
-            Date = AppSession.SelectedDate
-        });
-        RefreshAgenda();
+            await _apiClient.PostAsync<ApiEvent>(
+                "api/events",
+                new ApiEventRequest
+                {
+                    EventCode = $"EVT-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
+                    Name = draft.Title,
+                    Location = draft.Description,
+                    Date = AppSession.SelectedDate
+                });
+            await LoadEventsAsync();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            var message = $"Não foi possível guardar o evento: {exception.Message}";
+            _status.Text = message;
+            _status.TextColor = ViewTheme.Error;
+            await shell.DisplayAlertAsync("Eventos", message, "OK");
+        }
     }
 }
 
