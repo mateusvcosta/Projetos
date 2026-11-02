@@ -77,16 +77,19 @@ public sealed class MembersView : ContentView
             color: ViewTheme.Muted);
         header.Add(subtitle, 0, 2);
 
-        var addButton = ViewTheme.Action("+ Novo membro", () => EditMember(null));
-        addButton.WidthRequest = 200;
-        addButton.HeightRequest = 44;
-        addButton.MinimumHeightRequest = 44;
-        addButton.FontSize = 14;
-        addButton.Padding = 0;
-        addButton.HorizontalOptions = LayoutOptions.Start;
-        addButton.VerticalOptions = LayoutOptions.Start;
-        header.Add(addButton, 1, 0);
-        Grid.SetRowSpan(addButton, 3);
+        if (AppSession.IsDirection)
+        {
+            var addButton = ViewTheme.Action("+ Novo membro", () => EditMember(null));
+            addButton.WidthRequest = 200;
+            addButton.HeightRequest = 44;
+            addButton.MinimumHeightRequest = 44;
+            addButton.FontSize = 14;
+            addButton.Padding = 0;
+            addButton.HorizontalOptions = LayoutOptions.Start;
+            addButton.VerticalOptions = LayoutOptions.Start;
+            header.Add(addButton, 1, 0);
+            Grid.SetRowSpan(addButton, 3);
+        }
         content.Children.Add(header);
         content.Children.Add(_status);
         content.Children.Add(_retryButton);
@@ -189,14 +192,18 @@ public sealed class MembersView : ContentView
     private static Grid BuildTableHeader()
     {
         var header = CreateTableRow(44, ViewTheme.SurfaceDark);
-        var cells = new[]
+        var cells = new View[]
         {
             ViewTheme.TextLabel("Nome", 12, true, ViewTheme.Muted),
             ViewTheme.TextLabel("Cargo", 12, true, ViewTheme.Muted),
-            ViewTheme.TextLabel("Naipe", 12, true, ViewTheme.Muted),
-            ViewTheme.TextLabel("Ações", 12, true, ViewTheme.Muted)
+            ViewTheme.TextLabel("Naipe", 12, true, ViewTheme.Muted)
         };
-        cells[3].HorizontalTextAlignment = TextAlignment.End;
+        if (AppSession.IsDirection)
+        {
+            var actions = ViewTheme.TextLabel("Ações", 12, true, ViewTheme.Muted);
+            actions.HorizontalTextAlignment = TextAlignment.End;
+            cells = [.. cells, actions];
+        }
 
         for (var column = 0; column < cells.Length; column++)
         {
@@ -247,22 +254,25 @@ public sealed class MembersView : ContentView
             color: Color.FromArgb("#CCCCDD")));
         row.Add(voiceTypeCell, 2, 0);
 
-        var actionCell = new Grid
+        if (AppSession.IsDirection)
         {
-            ColumnDefinitions =
+            var actionCell = new Grid
             {
-                new ColumnDefinition(GridLength.Auto),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 8,
-            HorizontalOptions = LayoutOptions.End,
-            VerticalOptions = LayoutOptions.Center
-        };
-        actionCell.Add(MemberAction("pencil.svg", $"Editar {member.Name}", ViewTheme.Muted,
-            () => EditMember(member), "MemberEditButton"), 0, 0);
-        actionCell.Add(MemberAction("trash.svg", $"Remover {member.Name}", ViewTheme.Error,
-            () => RemoveMember(member), "MemberRemoveButton"), 1, 0);
-        row.Add(actionCell, 3, 0);
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Auto)
+                },
+                ColumnSpacing = 8,
+                HorizontalOptions = LayoutOptions.End,
+                VerticalOptions = LayoutOptions.Center
+            };
+            actionCell.Add(MemberAction("pencil.svg", $"Editar {member.Name}", ViewTheme.Muted,
+                () => EditMember(member), "MemberEditButton"), 0, 0);
+            actionCell.Add(MemberAction("trash.svg", $"Remover {member.Name}", ViewTheme.Error,
+                () => RemoveMember(member), "MemberRemoveButton"), 1, 0);
+            row.Add(actionCell, 3, 0);
+        }
 
         AddBottomBorder(row);
         return row;
@@ -374,6 +384,11 @@ public sealed class MembersView : ContentView
     {
         var shell = Shell.Current;
         if (shell is null)
+        {
+            return;
+        }
+
+        if (member is null && !AppSession.IsDirection)
         {
             return;
         }

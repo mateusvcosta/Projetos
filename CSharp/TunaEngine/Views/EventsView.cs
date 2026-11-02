@@ -30,7 +30,10 @@ public sealed class EventsView : ContentView
         content.Children.Add(new SessionCalendarView(RefreshAgenda));
         content.Children.Add(ViewTheme.TextLabel("Agenda", 20, true));
         content.Children.Add(_agenda);
-        content.Children.Add(ViewTheme.Action("+ Novo evento", AddEvent));
+        if (AppSession.IsDirection)
+        {
+            content.Children.Add(ViewTheme.Action("+ Novo evento", AddEvent));
+        }
         Content = content;
         RefreshAgenda();
         _ = LoadEventsAsync();
@@ -100,7 +103,7 @@ public sealed class EventsView : ContentView
     private async Task AddEvent()
     {
         var shell = Shell.Current;
-        if (shell is null)
+        if (shell is null || !AppSession.IsDirection)
         {
             return;
         }

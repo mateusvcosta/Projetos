@@ -30,6 +30,12 @@ internal static class AppSession
     public static string ProfileVoiceType { get; set; } = "";
     public static string ProfileInstrument { get; set; } = "";
 
+    public static bool IsDirection =>
+        string.Equals(ProfileRole, "CAR-00001", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(ProfileRole, "CAR-00002", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(ProfileRole, "Magister", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(ProfileRole, "Presidente", StringComparison.OrdinalIgnoreCase);
+
     public static string Money(float? value) =>
         value.HasValue ? value.Value.ToString("C", Portuguese) : "—";
 

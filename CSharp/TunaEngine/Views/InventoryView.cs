@@ -46,47 +46,53 @@ public sealed class InventoryView : ContentView
         content.Children.Add(_status);
         content.Children.Add(_retryButton);
 
-        var summaryContent = new VerticalStackLayout
+        if (AppSession.IsDirection)
         {
-            Spacing = 6,
-            Padding = new Thickness(20, 16),
-            Children =
+            var summaryContent = new VerticalStackLayout
             {
-                ViewTheme.TextLabel("CUSTO TOTAL DO INVENTÁRIO", 11, true, ViewTheme.Muted),
-                _totalLabel
-            }
-        };
-        var summary = ViewTheme.Card(summaryContent, 0);
-        summary.WidthRequest = 520;
-        summary.HeightRequest = 72;
-        summary.HorizontalOptions = LayoutOptions.Start;
+                Spacing = 6,
+                Padding = new Thickness(20, 16),
+                Children =
+                {
+                    ViewTheme.TextLabel("CUSTO TOTAL DO INVENTÁRIO", 11, true, ViewTheme.Muted),
+                    _totalLabel
+                }
+            };
+            var summary = ViewTheme.Card(summaryContent, 0);
+            summary.WidthRequest = 520;
+            summary.HeightRequest = 72;
+            summary.HorizontalOptions = LayoutOptions.Start;
 
-        var summaryRow = new Grid
-        {
-            ColumnDefinitions =
+            var summaryRow = new Grid
             {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 0,
-            HeightRequest = 72,
-            HorizontalOptions = LayoutOptions.Fill,
-            Margin = new Thickness(0, 0, 0, 24)
-        };
-        summaryRow.Add(summary, 0, 0);
-        content.Children.Add(summaryRow);
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Auto)
+                },
+                ColumnSpacing = 0,
+                HeightRequest = 72,
+                HorizontalOptions = LayoutOptions.Fill,
+                Margin = new Thickness(0, 0, 0, 24)
+            };
+            summaryRow.Add(summary, 0, 0);
+            content.Children.Add(summaryRow);
+        }
 
         content.Children.Add(_tables);
 
-        var newTableButton = ViewTheme.Action("+ Nova Tabela", AddTable);
-        newTableButton.WidthRequest = 260;
-        newTableButton.HeightRequest = 48;
-        newTableButton.MinimumHeightRequest = 48;
-        newTableButton.FontSize = 15;
-        newTableButton.Padding = 0;
-        newTableButton.Margin = new Thickness(0, 24, 0, 0);
-        newTableButton.HorizontalOptions = LayoutOptions.Start;
-        content.Children.Add(newTableButton);
+        if (AppSession.IsDirection)
+        {
+            var newTableButton = ViewTheme.Action("+ Nova Tabela", AddTable);
+            newTableButton.WidthRequest = 260;
+            newTableButton.HeightRequest = 48;
+            newTableButton.MinimumHeightRequest = 48;
+            newTableButton.FontSize = 15;
+            newTableButton.Padding = 0;
+            newTableButton.Margin = new Thickness(0, 24, 0, 0);
+            newTableButton.HorizontalOptions = LayoutOptions.Start;
+            content.Children.Add(newTableButton);
+        }
         Content = content;
         RefreshItems();
     }
@@ -94,9 +100,12 @@ public sealed class InventoryView : ContentView
     private void RefreshItems()
     {
         var items = AppSession.Tables.SelectMany(table => table.Items).ToList();
-        _totalLabel.Text = items.Any(item => !item.UnitCost.HasValue)
-            ? "Total indisponível"
-            : AppSession.Money(items.Sum(item => item.UnitCost.GetValueOrDefault()));
+        if (AppSession.IsDirection)
+        {
+            _totalLabel.Text = items.Any(item => !item.UnitCost.HasValue)
+                ? "Total indisponível"
+                : AppSession.Money(items.Sum(item => item.UnitCost.GetValueOrDefault()));
+        }
 
         AppSession.Tables.Sort(CompareTableNames);
         _tables.Children.Clear();
@@ -151,16 +160,26 @@ public sealed class InventoryView : ContentView
 
     private View BuildInventoryTable(StockTable table)
     {
-        var columns = new[]
-        {
-            new GridLength(160),
-            new GridLength(140),
-            new GridLength(120),
-            new GridLength(140),
-            new GridLength(160),
-            new GridLength(180),
-            new GridLength(88)
-        };
+        var columns = AppSession.IsDirection
+            ? new[]
+            {
+                new GridLength(160),
+                new GridLength(140),
+                new GridLength(120),
+                new GridLength(140),
+                new GridLength(160),
+                new GridLength(180),
+                new GridLength(88)
+            }
+            : new[]
+            {
+                new GridLength(160),
+                new GridLength(140),
+                new GridLength(140),
+                new GridLength(160),
+                new GridLength(180),
+                new GridLength(88)
+            };
 
         Grid CreateRow(params View[] cells)
         {
@@ -195,16 +214,19 @@ public sealed class InventoryView : ContentView
         var panelTitle = ViewTheme.TextLabel(
             table.Name.ToUpper(AppSession.Portuguese), 11, true, ViewTheme.Muted);
         sectionHeader.Add(panelTitle, 0, 0);
-        var newItemButton = ViewTheme.Action(
-            "+ Novo item",
-            () => EditItem(table, null),
-            primary: false);
-        newItemButton.WidthRequest = 120;
-        newItemButton.HeightRequest = 32;
-        newItemButton.MinimumHeightRequest = 0;
-        newItemButton.Padding = 0;
-        newItemButton.FontSize = 12;
-        sectionHeader.Add(newItemButton, 1, 0);
+        if (AppSession.IsDirection)
+        {
+            var newItemButton = ViewTheme.Action(
+                "+ Novo item",
+                () => EditItem(table, null),
+                primary: false);
+            newItemButton.WidthRequest = 120;
+            newItemButton.HeightRequest = 32;
+            newItemButton.MinimumHeightRequest = 0;
+            newItemButton.Padding = 0;
+            newItemButton.FontSize = 12;
+            sectionHeader.Add(newItemButton, 1, 0);
+        }
         var sectionHeaderDivider = new BoxView
         {
             HeightRequest = 1,
@@ -215,14 +237,23 @@ public sealed class InventoryView : ContentView
         Microsoft.Maui.Controls.Grid.SetColumnSpan(sectionHeaderDivider, 2);
         panel.Children.Add(sectionHeader);
 
-        var headings = CreateRow(
+        var headingCells = new List<View>
+        {
             ViewTheme.TextLabel("Item", 12, true, ViewTheme.Muted),
-            AlignedLabel("Marca", TextAlignment.Start),
-            AlignedLabel("Custo/Un.", TextAlignment.Start),
-            AlignedLabel("Estado", TextAlignment.Start),
-            AlignedLabel("Função", TextAlignment.Start),
-            AlignedLabel("Observações", TextAlignment.Start),
-            CenteredLabel("Ações", ViewTheme.Muted, 12, true));
+            AlignedLabel("Marca", TextAlignment.Start)
+        };
+        if (AppSession.IsDirection)
+        {
+            headingCells.Add(AlignedLabel("Custo/Un.", TextAlignment.Start));
+        }
+        headingCells.Add(AlignedLabel("Estado", TextAlignment.Start));
+        headingCells.Add(AlignedLabel("Função", TextAlignment.Start));
+        headingCells.Add(AlignedLabel("Observações", TextAlignment.Start));
+        if (AppSession.IsDirection)
+        {
+            headingCells.Add(CenteredLabel("Ações", ViewTheme.Muted, 12, true));
+        }
+        var headings = CreateRow(headingCells.ToArray());
         headings.HeightRequest = 44;
         headings.BackgroundColor = ViewTheme.SurfaceDark;
         var headingsDivider = new BoxView
@@ -268,31 +299,44 @@ public sealed class InventoryView : ContentView
             itemCell.Add(itemIcon, 0, 0);
             itemCell.Add(ViewTheme.TextLabel(item.Name, 14), 1, 0);
 
-            var editButton = TableAction("pencil.svg", "Editar", ViewTheme.Muted,
-                () => EditItem(table, capturedItem));
-            var removeButton = TableAction("trash.svg", "Remover", ViewTheme.Accent,
-                () => RemoveItem(table, capturedItem));
-            var actionCell = new Grid
+            var rowCells = new List<View>
             {
-                ColumnDefinitions =
-                {
-                    new ColumnDefinition(GridLength.Auto),
-                    new ColumnDefinition(GridLength.Auto)
-                },
-                ColumnSpacing = 8,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center
-            };
-            actionCell.Add(editButton, 0, 0);
-            actionCell.Add(removeButton, 1, 0);
-            var row = CreateRow(
                 itemCell,
-                AlignedLabel(ValueOrDash(item.Brand), TextAlignment.Start, ViewTheme.Muted, 12, false),
-                AlignedLabel(AppSession.Money(item.UnitCost), TextAlignment.Start, ViewTheme.Muted, 14),
-                AlignedLabel(ValueOrDash(item.Condition), TextAlignment.Start, ViewTheme.Muted, 12, false),
-                AlignedLabel(ValueOrDash(item.Function), TextAlignment.Start, ViewTheme.Muted, 12, false),
-                AlignedLabel(ValueOrDash(item.Notes), TextAlignment.Start, ViewTheme.Muted, 12, false),
-                actionCell);
+                AlignedLabel(ValueOrDash(item.Brand), TextAlignment.Start, ViewTheme.Muted, 12, false)
+            };
+            if (AppSession.IsDirection)
+            {
+                rowCells.Add(AlignedLabel(
+                    AppSession.Money(item.UnitCost),
+                    TextAlignment.Start,
+                    ViewTheme.Muted,
+                    14));
+            }
+            rowCells.Add(AlignedLabel(ValueOrDash(item.Condition), TextAlignment.Start, ViewTheme.Muted, 12, false));
+            rowCells.Add(AlignedLabel(ValueOrDash(item.Function), TextAlignment.Start, ViewTheme.Muted, 12, false));
+            rowCells.Add(AlignedLabel(ValueOrDash(item.Notes), TextAlignment.Start, ViewTheme.Muted, 12, false));
+            if (AppSession.IsDirection)
+            {
+                var editButton = TableAction("pencil.svg", "Editar", ViewTheme.Muted,
+                    () => EditItem(table, capturedItem));
+                var removeButton = TableAction("trash.svg", "Remover", ViewTheme.Accent,
+                    () => RemoveItem(table, capturedItem));
+                var actionCell = new Grid
+                {
+                    ColumnDefinitions =
+                    {
+                        new ColumnDefinition(GridLength.Auto),
+                        new ColumnDefinition(GridLength.Auto)
+                    },
+                    ColumnSpacing = 8,
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                };
+                actionCell.Add(editButton, 0, 0);
+                actionCell.Add(removeButton, 1, 0);
+                rowCells.Add(actionCell);
+            }
+            var row = CreateRow(rowCells.ToArray());
             row.HeightRequest = 64;
             var rowDivider = new BoxView
             {
@@ -384,7 +428,7 @@ public sealed class InventoryView : ContentView
     private async Task AddTable()
     {
         var shell = Shell.Current;
-        if (shell is null)
+        if (shell is null || !AppSession.IsDirection)
         {
             return;
         }
@@ -425,7 +469,7 @@ public sealed class InventoryView : ContentView
     private async Task EditItem(StockTable table, StockItem? item)
     {
         var shell = Shell.Current;
-        if (shell is null)
+        if (shell is null || (item is null && !AppSession.IsDirection))
         {
             return;
         }
