@@ -1,0 +1,1228 @@
+openapi: 3.0.3
+info:
+  title: TunaEngine API
+  version: 1.0.0
+  description: >-
+    Especificação das rotas HTTP atualmente expostas pelo API Gateway da
+    TunaEngine. Os pedidos e respostas usam JSON. A API não implementa
+    autenticação por token; o endpoint de login valida credenciais e devolve
+    dados do membro, mas não emite um token.
+servers:
+  - url: https://tunaengine-gateway.onrender.com
+    description: URL configurado no cliente para a publicação no Render; a disponibilidade deve ser confirmada.
+  - url: http://localhost:10000
+    description: Porta de fallback do Gateway quando executado em container local.
+tags:
+  - name: Members
+    description: Membros e autenticação por credenciais.
+  - name: Roles
+    description: Cargos associados aos membros.
+  - name: Events
+    description: Eventos, participantes, instrumentos e boleias.
+  - name: Documents
+    description: Metadados de documentos.
+  - name: Document types
+    description: Tipos documentais.
+  - name: Inventory
+    description: Artigos de inventário.
+  - name: Health
+    description: Estado do API Gateway.
+
+paths:
+  /api/members/login:
+    post:
+      tags: [Members]
+      operationId: loginMember
+      summary: Validar credenciais de um membro
+      description: >-
+        Valida email e palavra-passe. Uma resposta 200 não representa uma
+        sessão autenticada: a API não emite JWT nem outro token.
+      requestBody:
+        $ref: '#/components/requestBodies/LoginRequest'
+      responses:
+        '200':
+          description: Credenciais válidas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Email ou palavra-passe inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/members:
+    get:
+      tags: [Members]
+      operationId: listMembers
+      summary: Listar membros
+      description: Devolve os membros ordenados pela data de criação, do mais recente para o mais antigo.
+      responses:
+        '200':
+          description: Lista de membros. As palavras-passe não são devolvidas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Members]
+      operationId: createMember
+      summary: Criar membro
+      description: O identificador MongoDB, o código do membro e a data de criação são gerados pelo serviço.
+      requestBody:
+        $ref: '#/components/requestBodies/MemberCreateRequest'
+      responses:
+        '201':
+          description: Membro criado.
+          headers:
+            Location:
+              description: URL do membro criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/members/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Members]
+      operationId: getMemberById
+      summary: Consultar membro por ID
+      responses:
+        '200':
+          description: Membro encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Members]
+      operationId: updateMember
+      summary: Atualizar membro
+      description: >-
+        O pedido exige name e email. Embora o DTO aceite tunaName, studentNumber,
+        roleId e instrument, a implementação atual não persiste esses quatro
+        campos. A palavra-passe é opcional nesta operação.
+      requestBody:
+        $ref: '#/components/requestBodies/MemberUpdateRequest'
+      responses:
+        '204':
+          description: Membro atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Members]
+      operationId: deleteMember
+      summary: Remover membro
+      responses:
+        '204':
+          description: Membro removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/roles:
+    get:
+      tags: [Roles]
+      operationId: listRoles
+      summary: Listar cargos
+      responses:
+        '200':
+          description: Lista de cargos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Roles]
+      operationId: createRole
+      summary: Criar cargo
+      description: O identificador MongoDB e o código id_Cargo são gerados pelo serviço.
+      requestBody:
+        $ref: '#/components/requestBodies/RoleCreateRequest'
+      responses:
+        '201':
+          description: Cargo criado.
+          headers:
+            Location:
+              description: URL do cargo criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/roles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Roles]
+      operationId: getRoleById
+      summary: Consultar cargo por ID
+      responses:
+        '200':
+          description: Cargo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Roles]
+      operationId: updateRole
+      summary: Atualizar cargo
+      description: >-
+        Atualiza os campos não vazios enviados. Enviar ambos os campos vazios
+        não altera o cargo e resulta em 404 na implementação atual.
+      requestBody:
+        $ref: '#/components/requestBodies/RoleUpdateRequest'
+      responses:
+        '204':
+          description: Cargo atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Roles]
+      operationId: deleteRole
+      summary: Remover cargo
+      responses:
+        '204':
+          description: Cargo removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/events:
+    get:
+      tags: [Events]
+      operationId: listEvents
+      summary: Listar eventos
+      responses:
+        '200':
+          description: Lista de eventos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Events]
+      operationId: createEvent
+      summary: Criar evento
+      description: O identificador MongoDB e o código id_Event são gerados pelo serviço.
+      requestBody:
+        $ref: '#/components/requestBodies/EventCreateRequest'
+      responses:
+        '201':
+          description: Evento criado.
+          headers:
+            Location:
+              description: URL do evento criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/events/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Events]
+      operationId: getEventById
+      summary: Consultar evento por ID
+      responses:
+        '200':
+          description: Evento encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Events]
+      operationId: updateEvent
+      summary: Atualizar evento
+      description: Exige id_Event, date_Hour, name e location; as listas podem ser omitidas e ficam vazias.
+      requestBody:
+        $ref: '#/components/requestBodies/EventUpdateRequest'
+      responses:
+        '204':
+          description: Evento atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Events]
+      operationId: deleteEvent
+      summary: Remover evento
+      responses:
+        '204':
+          description: Evento removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/documents:
+    get:
+      tags: [Documents]
+      operationId: listDocuments
+      summary: Listar documentos
+      description: Devolve metadados; a API não recebe nem transfere ficheiros binários.
+      responses:
+        '200':
+          description: Lista de documentos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Documents]
+      operationId: createDocument
+      summary: Criar registo documental
+      description: O identificador MongoDB e o código id_Documento são gerados pelo serviço; file_Path é apenas metadado.
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentCreateRequest'
+      responses:
+        '201':
+          description: Registo criado.
+          headers:
+            Location:
+              description: URL do registo criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/documents/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Documents]
+      operationId: getDocumentById
+      summary: Consultar registo documental por ID
+      responses:
+        '200':
+          description: Registo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Documents]
+      operationId: updateDocument
+      summary: Atualizar registo documental
+      description: Exige id_Documento, tipo_Documento, id_Doc_Type e date_Created.
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentUpdateRequest'
+      responses:
+        '204':
+          description: Registo atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Documents]
+      operationId: deleteDocument
+      summary: Remover registo documental
+      responses:
+        '204':
+          description: Registo removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/doc-types:
+    get:
+      tags: [Document types]
+      operationId: listDocumentTypes
+      summary: Listar tipos documentais
+      responses:
+        '200':
+          description: Lista de tipos documentais.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentType'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Document types]
+      operationId: createDocumentType
+      summary: Criar tipo documental
+      description: O identificador MongoDB e o código id_Doc_Type são gerados pelo serviço; o DTO atual também exige id_Doc_Type no pedido.
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentTypeCreateRequest'
+      responses:
+        '201':
+          description: Tipo documental criado.
+          headers:
+            Location:
+              description: URL do tipo documental criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentType'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/doc-types/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Document types]
+      operationId: getDocumentTypeById
+      summary: Consultar tipo documental por ID
+      responses:
+        '200':
+          description: Tipo documental encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentType'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Document types]
+      operationId: updateDocumentType
+      summary: Atualizar tipo documental
+      description: Exige id_Doc_Type e doc_type.
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentTypeUpdateRequest'
+      responses:
+        '204':
+          description: Tipo documental atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Document types]
+      operationId: deleteDocumentType
+      summary: Remover tipo documental
+      responses:
+        '204':
+          description: Tipo documental removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/inventory:
+    get:
+      tags: [Inventory]
+      operationId: listInventory
+      summary: Listar artigos de inventário
+      description: Devolve os artigos ordenados pela data de criação, do mais recente para o mais antigo.
+      responses:
+        '200':
+          description: Lista de artigos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Inventory]
+      operationId: createInventoryItem
+      summary: Criar artigo de inventário
+      description: O identificador MongoDB, o código do artigo e a data de criação são gerados pelo serviço.
+      requestBody:
+        $ref: '#/components/requestBodies/InventoryItemRequest'
+      responses:
+        '201':
+          description: Artigo criado.
+          headers:
+            Location:
+              description: URL do artigo criado.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/inventory/{id}:
+    parameters:
+      - $ref: '#/components/parameters/MongoObjectId'
+    get:
+      tags: [Inventory]
+      operationId: getInventoryItemById
+      summary: Consultar artigo por ID
+      responses:
+        '200':
+          description: Artigo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Inventory]
+      operationId: updateInventoryItem
+      summary: Atualizar artigo de inventário
+      requestBody:
+        $ref: '#/components/requestBodies/InventoryItemRequest'
+      responses:
+        '204':
+          description: Artigo atualizado; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Inventory]
+      operationId: deleteInventoryItem
+      summary: Remover artigo de inventário
+      responses:
+        '204':
+          description: Artigo removido; sem corpo de resposta.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /health:
+    get:
+      tags: [Health]
+      operationId: getGatewayHealth
+      summary: Verificar saúde do Gateway
+      description: Este endpoint verifica o Gateway; não verifica a disponibilidade de cada serviço de negócio.
+      responses:
+        '200':
+          description: Gateway disponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+components:
+  parameters:
+    MongoObjectId:
+      name: id
+      in: path
+      required: true
+      description: Identificador MongoDB de 24 caracteres hexadecimais.
+      schema:
+        $ref: '#/components/schemas/MongoObjectId'
+  requestBodies:
+    LoginRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    MemberCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MemberCreateRequest'
+    MemberUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MemberUpdateRequest'
+    RoleCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RoleCreateRequest'
+    RoleUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RoleUpdateRequest'
+    EventCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventCreateRequest'
+    EventUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventUpdateRequest'
+    DocumentCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentCreateRequest'
+    DocumentUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentUpdateRequest'
+    DocumentTypeCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentTypeCreateRequest'
+    DocumentTypeUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentTypeUpdateRequest'
+    InventoryItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InventoryItemRequest'
+  responses:
+    BadRequest:
+      description: Pedido inválido, ID MongoDB mal formado ou erro de validação.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/Error'
+              - $ref: '#/components/schemas/ValidationProblemDetails'
+    NotFound:
+      description: Registo não encontrado; sem corpo de resposta.
+    BadGateway:
+      description: O Gateway não conseguiu obter resposta do serviço de destino.
+    ServerError:
+      description: Erro interno ou de ligação à base de dados; o formato não é normalizado pela aplicação.
+  schemas:
+    MongoObjectId:
+      type: string
+      pattern: '^[0-9a-fA-F]{24}$'
+      example: 507f1f77bcf86cd799439011
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: The members id must be a MongoDB ObjectId.
+    ValidationProblemDetails:
+      type: object
+      description: Formato ProblemDetails usado para erros de validação do pedido.
+      required: [type, title, status, errors]
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        traceId:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          description: Obrigatório; a implementação não valida o formato do endereço.
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        name:
+          type: string
+        email:
+          type: string
+        roleId:
+          type: string
+          nullable: true
+      description: Não inclui token de sessão.
+    MemberCreateRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        tunaName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          description: Obrigatório; a implementação não valida o formato do endereço.
+        password:
+          type: string
+          format: password
+          minLength: 8
+        phone:
+          type: string
+          nullable: true
+        studentNumber:
+          type: string
+          nullable: true
+        roleId:
+          type: string
+          nullable: true
+        voiceType:
+          type: string
+          nullable: true
+        instrument:
+          type: string
+          nullable: true
+    MemberUpdateRequest:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        tunaName:
+          type: string
+          nullable: true
+          description: Aceite pelo DTO, mas ignorado pela implementação de atualização.
+        email:
+          type: string
+          description: Obrigatório; a implementação não valida o formato do endereço.
+        password:
+          type: string
+          format: password
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        studentNumber:
+          type: string
+          nullable: true
+          description: Aceite pelo DTO, mas ignorado pela implementação de atualização.
+        roleId:
+          type: string
+          nullable: true
+          description: Aceite pelo DTO, mas ignorado pela implementação de atualização.
+        voiceType:
+          type: string
+          nullable: true
+        instrument:
+          type: string
+          nullable: true
+          description: Aceite pelo DTO, mas ignorado pela implementação de atualização.
+    Member:
+      type: object
+      required: [id, memberId, dateAdded, name, tunaName, email]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        memberId:
+          type: string
+          description: Código do membro gerado pelo serviço.
+        dateAdded:
+          type: string
+          format: date-time
+        name:
+          type: string
+        tunaName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        studentNumber:
+          type: string
+          nullable: true
+        roleId:
+          type: string
+          nullable: true
+        voice_Type:
+          type: string
+          nullable: true
+          description: Nome JSON atual da propriedade VoiceType na resposta.
+        instrument:
+          type: string
+          nullable: true
+      description: Não inclui Password nem PasswordHash.
+    RoleCreateRequest:
+      type: object
+      required: [cargo_Type]
+      properties:
+        id_Cargo:
+          type: string
+          nullable: true
+          description: O serviço atual substitui este valor por um código gerado.
+        cargo_Type:
+          type: string
+          minLength: 1
+    RoleUpdateRequest:
+      type: object
+      properties:
+        id_Cargo:
+          type: string
+          nullable: true
+        cargo_Type:
+          type: string
+          nullable: true
+      description: Enviar pelo menos um campo com valor não vazio.
+    Role:
+      type: object
+      required: [id, id_Cargo, cargo_Type]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        id_Cargo:
+          type: string
+        cargo_Type:
+          type: string
+    EventCreateRequest:
+      type: object
+      required: [date_Hour, name, location]
+      properties:
+        id_Event:
+          type: string
+          nullable: true
+          description: O serviço gera o código do evento e substitui este valor.
+        date_Hour:
+          type: string
+          format: date-time
+        name:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventParticipant'
+          default: []
+        instruments_Needed:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventInstrument'
+          default: []
+        boleias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventRide'
+          default: []
+    EventUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/EventCreateRequest'
+        - type: object
+          required: [id_Event]
+      description: O update exige também id_Event, além de date_Hour, name e location.
+    Event:
+      type: object
+      required: [id, id_Event, date_Hour, name, location, participants, instruments_Needed, boleias]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        id_Event:
+          type: string
+        date_Hour:
+          type: string
+          format: date-time
+        name:
+          type: string
+        location:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventParticipant'
+        instruments_Needed:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventInstrument'
+        boleias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventRide'
+    EventParticipant:
+      type: object
+      properties:
+        id_Member:
+          type: string
+        attendance_Status:
+          type: string
+    EventInstrument:
+      type: object
+      properties:
+        id_Inventory:
+          type: string
+        designation:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+    EventRide:
+      type: object
+      properties:
+        id_Driver:
+          type: string
+        pickup_Location:
+          type: string
+        departure_Hour:
+          type: string
+        available_Seats:
+          type: integer
+          minimum: 0
+        passenger_Ids:
+          type: array
+          items:
+            type: string
+    DocumentCreateRequest:
+      type: object
+      required: [tipo_Documento, id_Doc_Type, date_Created]
+      properties:
+        id_Documento:
+          type: string
+          nullable: true
+          description: O serviço gera o código documental e substitui este valor.
+        tipo_Documento:
+          type: string
+          minLength: 1
+        id_Doc_Type:
+          type: string
+          minLength: 1
+        file_Path:
+          type: string
+          nullable: true
+          description: Caminho ou referência; não desencadeia upload de ficheiro.
+        date_Created:
+          type: string
+          format: date-time
+        added_By:
+          type: string
+          nullable: true
+        obs:
+          type: string
+          nullable: true
+    DocumentUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/DocumentCreateRequest'
+        - type: object
+          required: [id_Documento]
+      description: O update exige também id_Documento.
+    Document:
+      type: object
+      required: [id, id_Documento, tipo_Documento, id_Doc_Type, file_Path, date_Created, added_By, obs]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        id_Documento:
+          type: string
+        tipo_Documento:
+          type: string
+        id_Doc_Type:
+          type: string
+        file_Path:
+          type: string
+        date_Created:
+          type: string
+          format: date-time
+        added_By:
+          type: string
+        obs:
+          type: string
+    DocumentTypeCreateRequest:
+      type: object
+      required: [id_Doc_Type, doc_type]
+      properties:
+        id_Doc_Type:
+          type: string
+          minLength: 1
+          description: Campo exigido pelo DTO atual, embora o serviço gere e substitua o código.
+        doc_type:
+          type: string
+          minLength: 1
+    DocumentTypeUpdateRequest:
+      type: object
+      required: [id_Doc_Type, doc_type]
+      properties:
+        id_Doc_Type:
+          type: string
+          minLength: 1
+        doc_type:
+          type: string
+          minLength: 1
+    DocumentType:
+      type: object
+      required: [id, id_Doc_Type, doc_type]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        id_Doc_Type:
+          type: string
+        doc_type:
+          type: string
+    InventoryItemRequest:
+      type: object
+      required: [designation, brand]
+      properties:
+        designation:
+          type: string
+          minLength: 1
+        instrumentType:
+          type: string
+          nullable: true
+        price:
+          type: number
+          minimum: 0
+          nullable: true
+        condition:
+          type: string
+          nullable: true
+        function:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        brand:
+          type: string
+          minLength: 1
+    InventoryItem:
+      type: object
+      required: [id, inventoryCode, dateAdded, designation]
+      properties:
+        id:
+          $ref: '#/components/schemas/MongoObjectId'
+        inventoryCode:
+          type: string
+          description: Código de inventário gerado pelo serviço.
+        dateAdded:
+          type: string
+          format: date-time
+        designation:
+          type: string
+        instrumentType:
+          type: string
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        condition:
+          type: string
+          nullable: true
+        function:
+          type: string
+          nullable: true
+        brand:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+    HealthStatus:
+      type: object
+      required: [status, service]
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: TunaEngine.Gateway
