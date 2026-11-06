@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "9e28a8a7-0d46-4c06-bb57-88db7e9a6a67",
+    "name": "TunaEngine Main Client",
+    "description": "Requests used by the TunaEngine MAUI client. Requests go through the API Gateway. The default baseUrl is the deployed Render gateway; override it for another gateway instance. Set the collection variables before using requests with a body or record ID. POST, PUT, and DELETE requests change stored data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://tunaengine-gateway.onrender.com", "type": "string" },
+    { "key": "email", "value": "", "type": "string" },
+    { "key": "password", "value": "", "type": "string" },
+    { "key": "memberId", "value": "", "type": "string" },
+    { "key": "memberName", "value": "", "type": "string" },
+    { "key": "memberTunaName", "value": "", "type": "string" },
+    { "key": "memberPhone", "value": "", "type": "string" },
+    { "key": "memberStudentNumber", "value": "", "type": "string" },
+    { "key": "memberRoleId", "value": "", "type": "string" },
+    { "key": "memberVoiceType", "value": "", "type": "string" },
+    { "key": "memberInstrument", "value": "", "type": "string" },
+    { "key": "eventName", "value": "", "type": "string" },
+    { "key": "eventLocation", "value": "", "type": "string" },
+    { "key": "eventDate", "value": "2026-12-01T19:30:00Z", "type": "string" },
+    { "key": "documentCode", "value": "", "type": "string" },
+    { "key": "documentTypeName", "value": "", "type": "string" },
+    { "key": "documentTypeId", "value": "", "type": "string" },
+    { "key": "documentDate", "value": "2026-12-01T19:30:00Z", "type": "string" },
+    { "key": "filePath", "value": "", "type": "string" },
+    { "key": "addedBy", "value": "", "type": "string" },
+    { "key": "documentNotes", "value": "", "type": "string" },
+    { "key": "inventoryId", "value": "", "type": "string" },
+    { "key": "inventoryDesignation", "value": "", "type": "string" },
+    { "key": "inventoryType", "value": "", "type": "string" },
+    { "key": "inventoryBrand", "value": "", "type": "string" },
+    { "key": "inventoryPrice", "value": "0", "type": "string" },
+    { "key": "inventoryCondition", "value": "", "type": "string" },
+    { "key": "inventoryFunction", "value": "", "type": "string" },
+    { "key": "inventoryNotes", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/members/login",
+            "description": "Returns the member profile for valid credentials. The client does not use a bearer token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "List members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/members"
+          }
+        },
+        {
+          "name": "Get member by ID (profile)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "description": "Set memberId to a MongoDB ObjectId."
+          }
+        },
+        {
+          "name": "Create member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{memberName}}\",\n  \"tunaName\": \"{{memberTunaName}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{memberPhone}}\",\n  \"studentNumber\": \"{{memberStudentNumber}}\",\n  \"roleId\": \"{{memberRoleId}}\",\n  \"voiceType\": \"{{memberVoiceType}}\",\n  \"instrument\": \"{{memberInstrument}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/members",
+            "description": "Requires memberName, email, and a password of at least eight characters. The other fields are optional."
+          }
+        },
+        {
+          "name": "Update member",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{memberName}}\",\n  \"tunaName\": \"{{memberTunaName}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{memberPhone}}\",\n  \"studentNumber\": \"{{memberStudentNumber}}\",\n  \"roleId\": \"{{memberRoleId}}\",\n  \"voiceType\": \"{{memberVoiceType}}\",\n  \"instrument\": \"{{memberInstrument}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "description": "Set memberId to an existing MongoDB ObjectId. Leave password empty to keep the existing password."
+          }
+        },
+        {
+          "name": "Delete member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "description": "Permanently deletes the member identified by memberId."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "List roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/roles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/events"
+          }
+        },
+        {
+          "name": "Create event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_Event\": \"\",\n  \"date_Hour\": \"{{eventDate}}\",\n  \"name\": \"{{eventName}}\",\n  \"location\": \"{{eventLocation}}\",\n  \"participants\": [],\n  \"instruments_Needed\": [],\n  \"boleias\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/events",
+            "description": "Requires eventName, eventLocation, and a valid ISO 8601 eventDate. Mirrors the event fields sent by the client."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "List documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/documents"
+          }
+        },
+        {
+          "name": "Create document",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_Documento\": \"{{documentCode}}\",\n  \"tipo_Documento\": \"{{documentTypeName}}\",\n  \"id_Doc_Type\": \"{{documentTypeId}}\",\n  \"file_Path\": \"{{filePath}}\",\n  \"date_Created\": \"{{documentDate}}\",\n  \"added_By\": \"{{addedBy}}\",\n  \"obs\": \"{{documentNotes}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/documents",
+            "description": "Requires documentTypeName, documentTypeId, and a valid ISO 8601 date_Created. The client sends these same fields when creating a document."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "List inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory"
+          }
+        },
+        {
+          "name": "Create inventory item",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"{{inventoryDesignation}}\",\n  \"instrumentType\": \"{{inventoryType}}\",\n  \"brand\": \"{{inventoryBrand}}\",\n  \"price\": {{inventoryPrice}},\n  \"condition\": \"{{inventoryCondition}}\",\n  \"function\": \"{{inventoryFunction}}\",\n  \"notes\": \"{{inventoryNotes}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/inventory",
+            "description": "Requires inventoryDesignation and inventoryBrand. inventoryPrice must be a number greater than or equal to zero."
+          }
+        },
+        {
+          "name": "Update inventory item",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"{{inventoryDesignation}}\",\n  \"instrumentType\": \"{{inventoryType}}\",\n  \"brand\": \"{{inventoryBrand}}\",\n  \"price\": {{inventoryPrice}},\n  \"condition\": \"{{inventoryCondition}}\",\n  \"function\": \"{{inventoryFunction}}\",\n  \"notes\": \"{{inventoryNotes}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/inventory/{{inventoryId}}",
+            "description": "Set inventoryId to an existing MongoDB ObjectId."
+          }
+        },
+        {
+          "name": "Delete inventory item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory/{{inventoryId}}",
+            "description": "Permanently deletes the inventory item identified by inventoryId."
+          }
+        }
+      ]
+    }
+  ]
+}
