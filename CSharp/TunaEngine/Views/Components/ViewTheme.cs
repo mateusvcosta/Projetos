@@ -1,5 +1,20 @@
 namespace TunaEngine.Views;
 
+internal sealed class ThemeColor
+{
+    public ThemeColor(string light, string dark)
+    {
+        Light = Color.FromArgb(light);
+        Dark = Color.FromArgb(dark);
+    }
+
+    public Color Light { get; }
+    public Color Dark { get; }
+
+    public Color Resolve() =>
+        Application.Current?.RequestedTheme == AppTheme.Dark ? Dark : Light;
+}
+
 internal static class ViewTheme
 {
     public static Color Background => GetColor("ThemeBackground");
@@ -248,5 +263,7 @@ internal static class ViewTheme
     }
 
     private static Color GetColor(string key) =>
-        (Color)Application.Current!.Resources[key];
+        Application.Current!.Resources[key] is ThemeColor themeColor
+            ? themeColor.Resolve()
+            : (Color)Application.Current.Resources[key];
 }

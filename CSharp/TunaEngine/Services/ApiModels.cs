@@ -46,6 +46,9 @@ public sealed class ApiMember
     [JsonPropertyName("num_Student")]
     public string? StudentNumber { get; set; }
 
+    [JsonPropertyName("Num_Studentt")]
+    public string? LegacyStudentNumber { get; set; }
+
     [JsonPropertyName("id_Role")]
     public string? RoleId { get; set; }
 

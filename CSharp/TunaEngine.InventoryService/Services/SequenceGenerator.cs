@@ -12,6 +12,6 @@ public sealed class SequenceGenerator(IMongoCollection<BsonDocument> sequences)
             Builders<BsonDocument>.Update.Inc("value", 1),
             new FindOneAndUpdateOptions<BsonDocument> { IsUpsert = true, ReturnDocument = ReturnDocument.After },
             cancellationToken);
-        return $"{prefix}-{result["value"].AsInt64:0000}";
+        return $"{prefix}-{result["value"].ToInt64():0000}";
     }
 }

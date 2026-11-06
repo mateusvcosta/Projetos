@@ -21,7 +21,7 @@ public sealed class MembersView : ContentView
 
     private static readonly Color[] AvatarColors =
     [
-        Color.FromArgb("#E8526A"),
+        ViewTheme.Accent,
         Color.FromArgb("#6B7DB3"),
         Color.FromArgb("#9B6B9B")
     ];
@@ -137,7 +137,7 @@ public sealed class MembersView : ContentView
                 TunaName = member.TunaName ?? "",
                 Email = member.Email ?? "",
                 Phone = member.Phone ?? "",
-                StudentNumber = member.StudentNumber ?? "",
+                StudentNumber = member.StudentNumber ?? member.LegacyStudentNumber ?? "",
                 VoiceType = member.VoiceType ?? member.LegacyVoiceType ?? "",
                 Instrument = member.Instrument ?? "",
                 Password = member.Password ?? ""

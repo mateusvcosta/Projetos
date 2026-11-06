@@ -24,11 +24,6 @@ public sealed class InventoryItemRequest
             errors[nameof(Price)] = ["Price cannot be negative."];
         }
 
-        if (string.IsNullOrWhiteSpace(Brand))
-        {
-            errors[nameof(Brand)] = ["Brand is required."];
-        }
-
         return errors;
     }
 
@@ -49,4 +44,3 @@ public sealed class InventoryItemRequest
         Brand = Brand?.Trim()
     };
 }
-

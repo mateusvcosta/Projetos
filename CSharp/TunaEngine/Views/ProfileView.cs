@@ -164,7 +164,7 @@ public sealed class ProfileView : ContentView
             AppSession.ProfileEmail = member.Email ?? "";
             AppSession.ProfileTunaName = member.TunaName ?? "";
             AppSession.ProfilePhone = member.Phone ?? "";
-            AppSession.ProfileStudentNumber = member.StudentNumber ?? "";
+            AppSession.ProfileStudentNumber = member.StudentNumber ?? member.LegacyStudentNumber ?? "";
             AppSession.ProfileVoiceType = member.VoiceType ?? "";
             AppSession.ProfileInstrument = member.Instrument ?? "";
             AppSession.ProfileRole = member.RoleId ?? "";
@@ -273,7 +273,7 @@ public sealed class ProfileView : ContentView
 
         empty.Children.Add(icon);
         empty.Children.Add(ViewTheme.TextLabel("Sem atividade recente", 14, color: Color.FromArgb("#A3A3B8")));
-        empty.Children.Add(ViewTheme.TextLabel("Conteúdo de demonstração", 12, color: Color.FromArgb("#444466")));
+        empty.Children.Add(ViewTheme.TextLabel("Conteúdo de demonstração", 12, color: ViewTheme.Muted));
         content.Children.Add(empty);
 
         return new Border

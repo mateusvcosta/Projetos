@@ -51,6 +51,8 @@ public sealed class AppShell : Shell
         Items.Add(item);
     }
 
+    public void RefreshMain(TunaEngineApiClient apiClient) => ShowMain(apiClient);
+
     private async Task SignOut(TunaEngineApiClient apiClient)
     {
         if (CurrentPage is not ContentPage page)

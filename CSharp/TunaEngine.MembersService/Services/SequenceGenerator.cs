@@ -17,6 +17,6 @@ public sealed class SequenceGenerator(IMongoCollection<BsonDocument> sequences)
             },
             cancellationToken);
 
-        return $"{prefix}-{result["value"].AsInt64:0000}";
+        return $"{prefix}-{result["value"].ToInt64():0000}";
     }
 }

@@ -258,7 +258,7 @@ public sealed class MainPage : ContentPage
         {
             WidthRequest = 38,
             HeightRequest = 38,
-            BackgroundColor = Color.FromArgb("#FF5C8A"),
+            BackgroundColor = ViewTheme.Accent,
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = 19 },
             VerticalOptions = LayoutOptions.Center,
@@ -591,7 +591,7 @@ public sealed class MainPage : ContentPage
             "Membros" => new MembersView(_apiClient),
             "Documentos" => new DocumentsView(_apiClient),
             "Perfil" => new ProfileView(_apiClient),
-            "Definições" => new SettingsView(_signOut),
+            "Definições" => new SettingsView(_signOut, ToggleTheme),
             _ => new HomeView(isWideLayout, _apiClient)
         };
 
@@ -603,5 +603,15 @@ public sealed class MainPage : ContentPage
             isMenuVisible = false;
             UpdateLayoutForWidth();
         }
+    }
+
+    private Task ToggleTheme()
+    {
+        var application = Application.Current!;
+        application.UserAppTheme = application.UserAppTheme == AppTheme.Light
+            ? AppTheme.Dark
+            : AppTheme.Light;
+        ((AppShell)Shell.Current).RefreshMain(_apiClient);
+        return Task.CompletedTask;
     }
 }

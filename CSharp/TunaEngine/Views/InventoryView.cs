@@ -76,23 +76,19 @@ public sealed class InventoryView : ContentView
                 Margin = new Thickness(0, 0, 0, 24)
             };
             summaryRow.Add(summary, 0, 0);
-            content.Children.Add(summaryRow);
-        }
 
-        content.Children.Add(_tables);
-
-        if (AppSession.IsDirection)
-        {
             var newTableButton = ViewTheme.Action("+ Nova Tabela", AddTable);
             newTableButton.WidthRequest = 260;
             newTableButton.HeightRequest = 48;
             newTableButton.MinimumHeightRequest = 48;
             newTableButton.FontSize = 15;
             newTableButton.Padding = 0;
-            newTableButton.Margin = new Thickness(0, 24, 0, 0);
-            newTableButton.HorizontalOptions = LayoutOptions.Start;
-            content.Children.Add(newTableButton);
+            newTableButton.HorizontalOptions = LayoutOptions.End;
+            summaryRow.Add(newTableButton, 1, 0);
+            content.Children.Add(summaryRow);
         }
+
+        content.Children.Add(_tables);
         Content = content;
         RefreshItems();
     }
@@ -285,7 +281,7 @@ public sealed class InventoryView : ContentView
             {
                 WidthRequest = 32,
                 HeightRequest = 32,
-                BackgroundColor = Color.FromArgb("#333355"),
+                BackgroundColor = ViewTheme.Stroke,
                 StrokeThickness = 0,
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 6 },
                 Content = new Image

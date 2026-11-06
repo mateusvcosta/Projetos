@@ -3,10 +3,12 @@ namespace TunaEngine.Views;
 public sealed class SettingsView : ContentView
 {
     private readonly Func<Task> _signOut;
+    private readonly Func<Task> _toggleTheme;
 
-    public SettingsView(Func<Task> signOut)
+    public SettingsView(Func<Task> signOut, Func<Task> toggleTheme)
     {
         _signOut = signOut;
+        _toggleTheme = toggleTheme;
         var content = new VerticalStackLayout { Spacing = 16 };
         var title = ViewTheme.TextLabel("Definições", 30, true);
         SemanticProperties.SetHeadingLevel(title, SemanticHeadingLevel.Level1);
@@ -24,7 +26,10 @@ public sealed class SettingsView : ContentView
                      new { Name = "Segurança", Description = "Conteúdo de demonstração" }
                  })
         {
-            content.Children.Add(CreateSettingRow(setting.Name, setting.Description, () => ShowSettingInfo(setting.Name)));
+            var callback = setting.Name == "Tema"
+                ? _toggleTheme
+                : () => ShowSettingInfo(setting.Name);
+            content.Children.Add(CreateSettingRow(setting.Name, setting.Description, callback));
         }
 
         content.Children.Add(CreateSectionLabel("Zona de perigo"));
@@ -32,7 +37,7 @@ public sealed class SettingsView : ContentView
         content.Children.Add(ViewTheme.TextLabel(
             "TunaEngine · Versão de demonstração",
             12,
-            color: Color.FromArgb("#444466")));
+            color: ViewTheme.Muted));
 
         Content = content;
     }
