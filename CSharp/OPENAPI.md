@@ -9,6 +9,7 @@ Importe `openapi.yaml` num visualizador compatível com OpenAPI 3.0, como Swagge
 Os servidores indicados no ficheiro são:
 
 - Render: `https://tunaengine-gateway.onrender.com` — endereço configurado no cliente; a disponibilidade atual não foi confirmada.
+- No cliente MAUI, o login aguarda até 180 segundos pelo arranque de serviços suspensos no Render e repete respostas transitórias do gateway durante toda essa janela; pedidos de escrita restantes não são repetidos automaticamente.
 - Docker local: `http://localhost:10000` — porta de fallback do container do Gateway.
 
 ## Limites conhecidos da implementação

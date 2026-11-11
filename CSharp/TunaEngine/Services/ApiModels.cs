@@ -96,6 +96,13 @@ public sealed class ApiEvent
 
     [JsonPropertyName("date_Hour")]
     public DateTime Date { get; set; }
+
+    [JsonPropertyName("id_Event")]
+    public string? EventCode { get; set; }
+
+    public List<ApiEventParticipant> Participants { get; set; } = [];
+    public List<ApiEventInstrument> Instruments_Needed { get; set; } = [];
+    public List<ApiEventRide> Boleias { get; set; } = [];
 }
 
 public sealed class ApiEventRequest
@@ -108,6 +115,46 @@ public sealed class ApiEventRequest
 
     public string Name { get; init; } = "";
     public string Location { get; init; } = "";
+
+    public List<ApiEventParticipant> Participants { get; init; } = [];
+    public List<ApiEventInstrument> Instruments_Needed { get; init; } = [];
+    public List<ApiEventRide> Boleias { get; init; } = [];
+}
+
+public sealed class ApiEventParticipant
+{
+    [JsonPropertyName("id_Member")]
+    public string MemberId { get; init; } = "";
+
+    [JsonPropertyName("attendance_Status")]
+    public string AttendanceStatus { get; init; } = "";
+}
+
+public sealed class ApiEventInstrument
+{
+    [JsonPropertyName("id_Inventory")]
+    public string InventoryId { get; init; } = "";
+
+    public string Designation { get; init; } = "";
+    public int Quantity { get; init; }
+}
+
+public sealed class ApiEventRide
+{
+    [JsonPropertyName("id_Driver")]
+    public string DriverId { get; init; } = "";
+
+    [JsonPropertyName("pickup_Location")]
+    public string PickupLocation { get; init; } = "";
+
+    [JsonPropertyName("departure_Hour")]
+    public string DepartureHour { get; init; } = "";
+
+    [JsonPropertyName("available_Seats")]
+    public int AvailableSeats { get; init; }
+
+    [JsonPropertyName("passenger_Ids")]
+    public List<string> PassengerIds { get; init; } = [];
 }
 
 public sealed class ApiDocument

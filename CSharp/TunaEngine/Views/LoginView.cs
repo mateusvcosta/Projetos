@@ -366,7 +366,8 @@ public sealed class LoginView : ContentPage
 
             var response = await _apiClient.PostAsync<ApiLoginResponse>(
                 "api/members/login",
-                new ApiLoginRequest { Email = email, Password = password });
+                new ApiLoginRequest { Email = email, Password = password },
+                retryTransientFailures: true);
 
             if (IsRememberMeEnabled())
             {

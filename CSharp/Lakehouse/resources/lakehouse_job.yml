@@ -1,0 +1,13 @@
+resources:
+  jobs:
+    tunaengine_lakehouse:
+      name: tunaengine-lakehouse
+      tasks:
+        - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: ../notebooks/01_bronze_ingestion.py
+        - task_key: silver_transformations
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: ../notebooks/02_silver_transformations.py

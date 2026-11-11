@@ -34,6 +34,7 @@ internal sealed class TeamMember
 internal sealed class AgendaEvent
 {
     public string Id { get; set; } = "";
+    public string EventCode { get; set; } = "";
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public DateTime? Date { get; set; }

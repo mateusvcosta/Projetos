@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -22,15 +23,41 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
     public async Task<T> PostAsync<T>(
         string relativeUri,
         object request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool retryTransientFailures = false)
         where T : class
     {
-        using var response = await httpClient.PostAsJsonAsync(
-            ResolveUri(relativeUri), request, JsonOptions, cancellationToken);
-        await EnsureSuccessAsync(response, relativeUri, cancellationToken);
-        return await response.Content.ReadFromJsonAsync<T>(JsonOptions, cancellationToken)
-            ?? throw new InvalidOperationException(
-                $"The API returned an empty response for '{relativeUri}'.");
+        using var retryCts = retryTransientFailures
+            ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)
+            : null;
+        retryCts?.CancelAfter(TimeSpan.FromSeconds(180));
+        var requestToken = retryCts?.Token ?? cancellationToken;
+        var attempt = 0;
+
+        while (true)
+        {
+            attempt++;
+            using var response = await httpClient.PostAsJsonAsync(
+                ResolveUri(relativeUri), request, JsonOptions, requestToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<T>(JsonOptions, requestToken)
+                    ?? throw new InvalidOperationException(
+                        $"The API returned an empty response for '{relativeUri}'.");
+            }
+
+            var shouldRetry = retryTransientFailures
+                && IsTransient(response.StatusCode);
+            if (!shouldRetry)
+            {
+                await EnsureSuccessAsync(response, relativeUri, requestToken);
+            }
+
+            var delay = response.Headers.RetryAfter?.Delta
+                ?? TimeSpan.FromSeconds(Math.Min(attempt * 3, 15));
+            await Task.Delay(delay, requestToken);
+        }
     }
 
     public async Task PutAsync(
@@ -66,6 +93,12 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
         throw new HttpRequestException(
             $"The API returned {(int)response.StatusCode} for '{relativeUri}': {details}");
     }
+
+    private static bool IsTransient(HttpStatusCode statusCode) =>
+        statusCode is HttpStatusCode.TooManyRequests
+            or HttpStatusCode.BadGateway
+            or HttpStatusCode.ServiceUnavailable
+            or HttpStatusCode.GatewayTimeout;
 
     private static Uri ResolveUri(string relativeUri)
     {

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TunaEngine.Gateway")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13f4c54d0faadf70ea6221e6f23d43d0974bcaef")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+22694a3d05d21a3c92ae40b014c17d3ad1c12d1e")]
 [assembly: System.Reflection.AssemblyProductAttribute("TunaEngine.Gateway")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TunaEngine.Gateway")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

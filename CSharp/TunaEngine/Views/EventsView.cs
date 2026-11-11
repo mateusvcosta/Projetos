@@ -57,6 +57,7 @@ public sealed class EventsView : ContentView
                 return new AgendaEvent
                 {
                     Id = entry.Id,
+                    EventCode = entry.EventCode ?? "",
                     Title = entry.Name,
                     Description = entry.Location,
                     Date = date
@@ -96,8 +97,171 @@ public sealed class EventsView : ContentView
             var description = entry.Date.HasValue
                 ? $"{entry.Date.Value:dd/MM/yyyy} · {entry.Description}"
                 : entry.Description;
-            _agenda.Children.Add(ViewTheme.EventCard(entry.Title, description));
+            _agenda.Children.Add(BuildEventCard(entry, description));
         }
+    }
+
+    private View BuildEventCard(AgendaEvent entry, string description)
+    {
+        var cardContent = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 12
+        };
+        cardContent.Add(new VerticalStackLayout
+        {
+            Spacing = 4,
+            Children =
+            {
+                ViewTheme.TextLabel(entry.Title, 16, true),
+                ViewTheme.TextLabel(description, 13, color: ViewTheme.Muted)
+            }
+        }, 0, 0);
+
+        var details = ViewTheme.Action("Detalhes", () => ShowDetails(entry), primary: false);
+        cardContent.Add(details, 1, 0);
+        if (AppSession.IsDirection)
+        {
+            var actions = new HorizontalStackLayout
+            {
+                Spacing = 6,
+                VerticalOptions = LayoutOptions.Center
+            };
+            actions.Children.Add(ViewTheme.Action("Editar", () => EditEvent(entry), primary: false));
+            actions.Children.Add(ViewTheme.Action("Eliminar", () => DeleteEvent(entry), primary: false));
+            cardContent.Remove(details);
+            cardContent.Add(actions, 1, 0);
+        }
+
+        return ViewTheme.Card(cardContent);
+    }
+
+    private async Task EditEvent(AgendaEvent entry)
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var eventDetails = await GetEventAsync(entry.Id);
+        if (eventDetails is null)
+        {
+            return;
+        }
+
+        var popup = new AddEventPopup(eventDetails);
+        var draft = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
+        if (draft is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _apiClient.PutAsync($"api/events/{entry.Id}", new ApiEventRequest
+            {
+                EventCode = entry.EventCode,
+                Name = draft.Title,
+                Location = draft.Description,
+                Date = draft.Date,
+                Participants = draft.Participants,
+                Instruments_Needed = draft.Instruments,
+                Boleias = draft.Rides
+            });
+            await LoadEventsAsync();
+        }
+
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            await ShowErrorAsync($"Não foi possível atualizar o evento: {exception.Message}");
+        }
+    }
+
+    private async Task ShowDetails(AgendaEvent entry)
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var eventDetails = await GetEventAsync(entry.Id);
+        if (eventDetails is null)
+        {
+            return;
+        }
+
+        var popup = new EventDetailsPopup(eventDetails);
+        await ModalOverlay.ShowAsync(
+            shell.CurrentPage, popup, popup.Completion, popup.Cancel);
+    }
+
+    private async Task<ApiEvent?> GetEventAsync(string id)
+    {
+        try
+        {
+            return await _apiClient.GetAsync<ApiEvent>($"api/events/{id}");
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            await ShowErrorAsync($"Não foi possível carregar o evento: {exception.Message}");
+            return null;
+        }
+    }
+
+    private async Task DeleteEvent(AgendaEvent entry)
+    {
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var confirmation = new ConfirmationPopup(
+            "Eliminar evento",
+            $"Tem a certeza de que pretende remover “{entry.Title}”?",
+            "Eliminar");
+        var confirmed = await ModalOverlay.ShowAsync(
+            shell.CurrentPage, confirmation, confirmation.Completion, confirmation.Cancel);
+        if (confirmed is not true)
+        {
+            return;
+        }
+
+        try
+        {
+            await _apiClient.DeleteAsync($"api/events/{entry.Id}");
+            await LoadEventsAsync();
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            await ShowErrorAsync($"Não foi possível eliminar o evento: {exception.Message}");
+        }
+    }
+
+    private async Task ShowErrorAsync(string message)
+    {
+        _status.Text = message;
+        _status.TextColor = ViewTheme.Error;
+        _retryButton.IsVisible = true;
+        var shell = Shell.Current;
+        if (shell is null)
+        {
+            return;
+        }
+
+        var errorPopup = new MessagePopup("Eventos", message);
+        await ModalOverlay.ShowAsync(
+            shell.CurrentPage, errorPopup, errorPopup.Completion, errorPopup.Cancel);
     }
 
     private async Task AddEvent()
@@ -128,7 +292,10 @@ public sealed class EventsView : ContentView
                     EventCode = "",
                     Name = draft.Title,
                     Location = draft.Description,
-                    Date = AppSession.SelectedDate
+                    Date = draft.Date,
+                    Participants = draft.Participants,
+                    Instruments_Needed = draft.Instruments,
+                    Boleias = draft.Rides
                 });
             await LoadEventsAsync();
         }

@@ -50,7 +50,7 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton(_ => new HttpClient
 		{
-			Timeout = TimeSpan.FromSeconds(30)
+			Timeout = TimeSpan.FromSeconds(180)
 		});
 		builder.Services.AddSingleton<TunaEngineApiClient>();
 
