@@ -198,9 +198,133 @@ public sealed class EventsView : ContentView
             return;
         }
 
-        var popup = new EventDetailsPopup(eventDetails);
+        var popup = new EventDetailsPopup(
+            eventDetails,
+            () => ToggleParticipationAsync(entry.Id, eventDetails),
+            choice => UpdateTransportAsync(entry.Id, eventDetails, choice));
         await ModalOverlay.ShowAsync(
             shell.CurrentPage, popup, popup.Completion, popup.Cancel);
+    }
+
+    private async Task<bool> ToggleParticipationAsync(string eventId, ApiEvent eventDetails)
+    {
+        if (string.IsNullOrWhiteSpace(AppSession.ProfileMemberId))
+        {
+            await ShowErrorAsync("Não foi possível identificar o membro autenticado.");
+            return false;
+        }
+
+        var participants = eventDetails.Participants
+            .Where(participant => !string.Equals(
+                participant.MemberId,
+                AppSession.ProfileMemberId,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var wasParticipating = eventDetails.Participants.Any(participant =>
+            string.Equals(
+                participant.MemberId,
+                AppSession.ProfileMemberId,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (!wasParticipating)
+        {
+            participants.Add(new ApiEventParticipant
+            {
+                MemberId = AppSession.ProfileMemberId,
+                AttendanceStatus = "pending"
+            });
+        }
+
+        try
+        {
+            await _apiClient.PutAsync($"api/events/{eventId}", new ApiEventRequest
+            {
+                EventCode = eventDetails.EventCode ?? "",
+                Name = eventDetails.Name,
+                Location = eventDetails.Location,
+                Date = new DateTimeOffset(eventDetails.Date),
+                Participants = participants,
+                Instruments_Needed = eventDetails.Instruments_Needed,
+                Boleias = eventDetails.Boleias
+            });
+            eventDetails.Participants = participants;
+            return !wasParticipating;
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            await ShowErrorAsync($"Não foi possível atualizar a participação: {exception.Message}");
+            return wasParticipating;
+        }
+    }
+
+    private async Task<bool> UpdateTransportAsync(
+        string eventId,
+        ApiEvent eventDetails,
+        TransportChoice choice)
+    {
+        if (string.IsNullOrWhiteSpace(AppSession.ProfileMemberId))
+        {
+            await ShowErrorAsync("Não foi possível identificar o membro autenticado.");
+            return false;
+        }
+
+        var rides = eventDetails.Boleias.ToList();
+        if (choice.Action == TransportAction.OfferRide)
+        {
+            rides.Add(new ApiEventRide
+            {
+                DriverId = AppSession.ProfileMemberId,
+                PickupLocation = choice.PickupLocation,
+                AvailableSeats = choice.AvailableSeats,
+                PassengerIds = []
+            });
+        }
+        else if (choice.RideIndex is int rideIndex &&
+                 rideIndex >= 0 &&
+                 rideIndex < rides.Count)
+        {
+            var ride = rides[rideIndex];
+            if (ride.PassengerIds.Contains(AppSession.ProfileMemberId))
+            {
+                return true;
+            }
+
+            if (ride.PassengerIds.Count >= ride.AvailableSeats)
+            {
+                await ShowErrorAsync("Esta boleia já não tem lugares disponíveis.");
+                return false;
+            }
+
+            ride.PassengerIds.Add(AppSession.ProfileMemberId);
+        }
+        else
+        {
+            await ShowErrorAsync("A boleia selecionada já não está disponível.");
+            return false;
+        }
+
+        try
+        {
+            await _apiClient.PutAsync($"api/events/{eventId}", new ApiEventRequest
+            {
+                EventCode = eventDetails.EventCode ?? "",
+                Name = eventDetails.Name,
+                Location = eventDetails.Location,
+                Date = new DateTimeOffset(eventDetails.Date),
+                Participants = eventDetails.Participants,
+                Instruments_Needed = eventDetails.Instruments_Needed,
+                Boleias = rides
+            });
+            eventDetails.Boleias = rides;
+            return true;
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or JsonException or TaskCanceledException or InvalidOperationException)
+        {
+            await ShowErrorAsync($"Não foi possível atualizar a boleia: {exception.Message}");
+            return false;
+        }
     }
 
     private async Task<ApiEvent?> GetEventAsync(string id)
@@ -293,9 +417,6 @@ public sealed class EventsView : ContentView
                     Name = draft.Title,
                     Location = draft.Description,
                     Date = draft.Date,
-                    Participants = draft.Participants,
-                    Instruments_Needed = draft.Instruments,
-                    Boleias = draft.Rides
                 });
             await LoadEventsAsync();
         }

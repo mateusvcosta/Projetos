@@ -87,13 +87,19 @@ public sealed class AddEventPopup : ContentView
             {
                 ViewTheme.TextLabel(existing is null ? "Novo evento" : "Editar evento", 22, true),
                 ViewTheme.TextLabel("Dados gerais", 14, true, ViewTheme.Muted),
-                _titleEntry, _locationEntry, _datePicker,
-                BuildParticipantsSection(),
-                BuildInstrumentsSection(),
-                BuildRidesSection(),
-                _errorLabel, buttons
+                _titleEntry, _locationEntry, _datePicker
             }
         };
+
+        if (existing is not null)
+        {
+            form.Children.Add(BuildParticipantsSection());
+            form.Children.Add(BuildInstrumentsSection());
+            form.Children.Add(BuildRidesSection());
+        }
+
+        form.Children.Add(_errorLabel);
+        form.Children.Add(buttons);
 
         Content = new Border
         {
