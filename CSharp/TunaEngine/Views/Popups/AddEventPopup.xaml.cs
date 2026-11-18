@@ -93,9 +93,33 @@ public sealed class AddEventPopup : ContentView
 
         if (existing is not null)
         {
-            form.Children.Add(BuildParticipantsSection());
-            form.Children.Add(BuildInstrumentsSection());
-            form.Children.Add(BuildRidesSection());
+            var participantsSection = BuildParticipantsSection();
+            var instrumentsSection = BuildInstrumentsSection();
+            var ridesSection = BuildRidesSection();
+            participantsSection.IsVisible = false;
+            instrumentsSection.IsVisible = false;
+            ridesSection.IsVisible = false;
+
+            form.Children.Add(ViewTheme.TextLabel(
+                "Depois de guardar os dados principais, podes adicionar participantes, instrumentos e transporte.",
+                13,
+                color: ViewTheme.Muted));
+            form.Children.Add(ViewTheme.TextLabel("Informação adicional", 14, true, ViewTheme.Muted));
+            form.Children.Add(CreateSectionButton(
+                "Ver membros participantes",
+                participantsSection,
+                "Esconder membros"));
+            form.Children.Add(participantsSection);
+            form.Children.Add(CreateSectionButton(
+                "Ver instrumentos necessários",
+                instrumentsSection,
+                "Esconder instrumentos"));
+            form.Children.Add(instrumentsSection);
+            form.Children.Add(CreateSectionButton(
+                "Ver boleias",
+                ridesSection,
+                "Esconder boleias"));
+            form.Children.Add(ridesSection);
         }
 
         form.Children.Add(_errorLabel);
@@ -113,6 +137,20 @@ public sealed class AddEventPopup : ContentView
             Content = new ScrollView { MaximumHeightRequest = 760, Content = form }
         };
         RefreshLists();
+    }
+
+    private static StateButton CreateSectionButton(
+        string showText,
+        View section,
+        string hideText)
+    {
+        var button = CreateButton(showText, ViewTheme.Text, ViewTheme.SurfaceDark);
+        button.Clicked += (_, _) =>
+        {
+            section.IsVisible = !section.IsVisible;
+            button.Text = section.IsVisible ? hideText : showText;
+        };
+        return button;
     }
 
     public AddEventPopup() : this(null) { }

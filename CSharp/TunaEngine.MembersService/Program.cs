@@ -22,5 +22,22 @@ builder.Services.AddScoped<RolesInterface, RolesService>();
 builder.Services.AddControllers();
 var app = builder.Build();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "TunaEngine.MembersService" }));
+app.MapGet("/health/live", () => Results.Ok(new { status = "ok", service = "TunaEngine.MembersService" }));
+app.MapGet("/health/ready", async () =>
+{
+    try
+    {
+        await app.Services.GetRequiredService<IMongoClient>()
+            .GetDatabase(mongoSettings.MembersDatabaseName)
+            .RunCommandAsync<MongoDB.Bson.BsonDocument>(
+                MongoDB.Bson.BsonDocument.Parse("{ ping: 1 }"));
+        return Results.Ok(new { status = "ready", service = "TunaEngine.MembersService" });
+    }
+    catch (Exception exception)
+    {
+        app.Logger.LogWarning(exception, "Readiness check failed.");
+        return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    }
+});
 app.MapControllers();
 app.Run();

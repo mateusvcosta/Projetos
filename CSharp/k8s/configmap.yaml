@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tunaengine-config
+  namespace: tunaengine
+data:
+  MembersServiceUrl: "http://members-service.tunaengine.svc.cluster.local:8080/"
+  EventsServiceUrl: "http://events-service.tunaengine.svc.cluster.local:8080/"
+  DocumentsServiceUrl: "http://documents-service.tunaengine.svc.cluster.local:8080/"
+  InventoryServiceUrl: "http://inventory-service.tunaengine.svc.cluster.local:8080/"

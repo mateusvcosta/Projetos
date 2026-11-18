@@ -1,0 +1,125 @@
+name: tunaengine
+
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-tunaengine}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-change-this-local-password}
+    ports:
+      - "${MONGO_PORT:-27018}:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - tunaengine
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mongosh --quiet --username "$$MONGO_INITDB_ROOT_USERNAME" --password "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand('ping').ok"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  members-service:
+    build:
+      context: ./TunaEngine.MembersService
+      dockerfile: Dockerfile
+    image: tunaengine-members-service:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://${MONGO_ROOT_USERNAME:-tunaengine}:${MONGO_ROOT_PASSWORD:-change-this-local-password}@mongodb:27017/?authSource=admin
+    expose:
+      - "8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tunaengine
+
+  events-service:
+    build:
+      context: ./TunaEngine.EventsService
+      dockerfile: Dockerfile
+    image: tunaengine-events-service:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://${MONGO_ROOT_USERNAME:-tunaengine}:${MONGO_ROOT_PASSWORD:-change-this-local-password}@mongodb:27017/?authSource=admin
+    expose:
+      - "8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tunaengine
+
+  documents-service:
+    build:
+      context: ./TunaEngine.DocumentsService
+      dockerfile: Dockerfile
+    image: tunaengine-documents-service:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://${MONGO_ROOT_USERNAME:-tunaengine}:${MONGO_ROOT_PASSWORD:-change-this-local-password}@mongodb:27017/?authSource=admin
+    expose:
+      - "8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tunaengine
+
+  inventory-service:
+    build:
+      context: ./TunaEngine.InventoryService
+      dockerfile: Dockerfile
+    image: tunaengine-inventory-service:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://${MONGO_ROOT_USERNAME:-tunaengine}:${MONGO_ROOT_PASSWORD:-change-this-local-password}@mongodb:27017/?authSource=admin
+    expose:
+      - "8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tunaengine
+
+  gateway:
+    build:
+      context: ./TunaEngine.Gateway
+      dockerfile: Dockerfile
+    image: tunaengine-gateway:local
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      MembersServiceUrl: http://members-service:8080/
+      EventsServiceUrl: http://events-service:8080/
+      DocumentsServiceUrl: http://documents-service:8080/
+      InventoryServiceUrl: http://inventory-service:8080/
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      members-service:
+        condition: service_started
+      events-service:
+        condition: service_started
+      documents-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+    networks:
+      - tunaengine
+
+networks:
+  tunaengine:
+    driver: bridge
+
+volumes:
+  mongodb-data:

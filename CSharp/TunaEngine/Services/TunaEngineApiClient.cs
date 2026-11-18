@@ -109,6 +109,14 @@ public sealed class TunaEngineApiClient(HttpClient httpClient)
                 nameof(relativeUri));
         }
 
-        return new Uri(new Uri(ApiServiceUrls.Gateway), relativeUri);
+        var gatewayUrl = ApiServiceUrls.Gateway;
+        if (string.IsNullOrWhiteSpace(gatewayUrl)
+            || !Uri.TryCreate(gatewayUrl, UriKind.Absolute, out var gatewayUri))
+        {
+            throw new InvalidOperationException(
+                "The gateway URL is not configured. Set TUNAENGINE_GATEWAY_URL or the TUNAENGINE_GATEWAY_URL preference.");
+        }
+
+        return new Uri(gatewayUri, relativeUri);
     }
 }
